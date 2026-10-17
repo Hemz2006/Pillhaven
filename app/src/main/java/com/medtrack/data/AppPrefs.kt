@@ -27,6 +27,22 @@ class AppPrefs(context: Context) {
         get() = prefs.getBoolean(KEY_HEALTH_WARNING_HIDDEN, false)
         set(value) = prefs.edit().putBoolean(KEY_HEALTH_WARNING_HIDDEN, value).apply()
 
+    /** The camera photo waiting to be handled, if any (see PendingCapture). */
+    var pendingCapture: PendingCapture?
+        get() {
+            val owner = prefs.getString(KEY_CAPTURE_OWNER, null) ?: return null
+            return PendingCapture(owner, prefs.getLong(KEY_CAPTURE_STARTED, 0))
+        }
+        set(value) {
+            prefs.edit().apply {
+                if (value == null) {
+                    remove(KEY_CAPTURE_OWNER).remove(KEY_CAPTURE_STARTED)
+                } else {
+                    putString(KEY_CAPTURE_OWNER, value.owner).putLong(KEY_CAPTURE_STARTED, value.startedAt)
+                }
+            }.commit() // written before the camera opens, in case MedTrack is closed straight after
+        }
+
     /** Restock prompts already answered, as restockKey()s, so each course end asks only once. */
     val restockAsked: Set<String> get() = prefs.getStringSet(KEY_RESTOCK_ASKED, null).orEmpty().toSet()
 
@@ -61,5 +77,7 @@ class AppPrefs(context: Context) {
         const val KEY_SETUP_DONE = "setupDone"
         const val KEY_TODAY_VIEW = "todayView"
         const val KEY_RESTOCK_ASKED = "restockAsked"
+        const val KEY_CAPTURE_OWNER = "captureOwner"
+        const val KEY_CAPTURE_STARTED = "captureStartedAt"
     }
 }

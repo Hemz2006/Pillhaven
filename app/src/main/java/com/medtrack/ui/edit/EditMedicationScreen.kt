@@ -66,8 +66,8 @@ fun EditMedicationScreen(c: AppContainer, id: Long, onDone: () -> Unit) {
     val state by vm.state.collectAsStateWithLifecycle()
     LaunchedEffect(state.saved) { if (state.saved) onDone() }
 
-    val photoSources = rememberPhotoSources(vm::addPhotos)
-    val scanSources = rememberPhotoSources { vm.addPhotos(it, scan = true) }
+    val photoSources = rememberPhotoSources("edit:$id", vm::addPhotos)
+    val scanSources = rememberPhotoSources("scan:$id") { vm.addPhotos(it, scan = true) }
 
     val med = state.med
     ScreenScaffold(

@@ -88,7 +88,7 @@ fun DetailScreen(c: AppContainer, id: Long, onBack: () -> Unit, onEdit: () -> Un
     var confirmDelete by remember { mutableStateOf(false) }
     // Photos picked here are cropped, then added to the medication; the first becomes its main photo if it had none.
     var cropping by remember { mutableStateOf(emptyList<String>()) }
-    val photoSources = rememberPhotoSources { uris ->
+    val photoSources = rememberPhotoSources("detail:$id") { uris ->
         c.appScope.launch {
             val added = uris.mapNotNull { uri ->
                 try {
