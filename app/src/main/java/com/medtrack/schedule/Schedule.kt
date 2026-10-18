@@ -22,19 +22,29 @@ enum class MealType { BREAKFAST, LUNCH, DINNER, ANY }
 
 @Serializable
 sealed interface ScheduleRule {
+    /** Which eye, ear or nostril this block's doses are for; only used for drops that have sides. */
+    val side: Side?
+
     @Serializable @SerialName("daily")
-    data class DailyTimes(val times: List<LocalTime>) : ScheduleRule
+    data class DailyTimes(val times: List<LocalTime>, override val side: Side? = null) : ScheduleRule
 
     @Serializable @SerialName("weekdays")
-    data class Weekdays(val days: Set<DayOfWeek>, val times: List<LocalTime>) : ScheduleRule
+    data class Weekdays(val days: Set<DayOfWeek>, val times: List<LocalTime>, override val side: Side? = null) : ScheduleRule
 
     /** Doses every [intervalHours] of elapsed time from [anchor], continuing across days. */
     @Serializable @SerialName("interval")
-    data class EveryNHours(val intervalHours: Int, val anchor: LocalDateTime) : ScheduleRule
+    data class EveryNHours(val intervalHours: Int, val anchor: LocalDateTime, override val side: Side? = null) : ScheduleRule
 
     /** Fires [delayMinutes] after a matching meal; fires at [fallbackTime] if no meal was logged. */
     @Serializable @SerialName("meal")
-    data class AfterMeal(val meal: MealType, val delayMinutes: Int, val fallbackTime: LocalTime) : ScheduleRule
+    data class AfterMeal(val meal: MealType, val delayMinutes: Int, val fallbackTime: LocalTime, override val side: Side? = null) : ScheduleRule
+}
+
+fun ScheduleRule.withSide(side: Side?): ScheduleRule = when (this) {
+    is ScheduleRule.DailyTimes -> copy(side = side)
+    is ScheduleRule.Weekdays -> copy(side = side)
+    is ScheduleRule.EveryNHours -> copy(side = side)
+    is ScheduleRule.AfterMeal -> copy(side = side)
 }
 
 /** One or more rules (e.g. after breakfast and after dinner) sharing a course's start and end dates. */

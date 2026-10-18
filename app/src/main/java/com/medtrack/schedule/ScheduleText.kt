@@ -17,12 +17,18 @@ fun mealName(meal: MealType): String = when (meal) {
     MealType.ANY -> "any meal"
 }
 
-fun Schedule.describe(): String {
-    val base = rules.joinToString("; ") { it.describe() }
+fun Schedule.describe(site: DropSite? = null): String {
+    val base = rules.joinToString("; ") { it.describe(site) }
     return if (endDate != null) "$base, until ${endDate.format(DAY_MONTH)}" else base
 }
 
-fun ScheduleRule.describe(): String =
+/** The rule in words; with a [site] that has sides, followed by the side ("Daily at 8:00 AM · Left eye"). */
+fun ScheduleRule.describe(site: DropSite? = null): String {
+    val sideText = site?.takeIf { it.sided }?.let { s -> side?.let { " · " + DoseSide(s, it).label } }.orEmpty()
+    return timing() + sideText
+}
+
+private fun ScheduleRule.timing(): String =
     when (val r = this) {
         is ScheduleRule.DailyTimes -> "Daily at ${r.times.sorted().joinToString(", ") { it.format(HM) }}"
         is ScheduleRule.Weekdays -> {

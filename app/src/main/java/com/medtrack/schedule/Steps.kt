@@ -38,11 +38,11 @@ fun List<Schedule>.stepsValidationError(): String? {
 }
 
 /** One line per step: "Until 28 Oct: Daily at 8:00 AM…", then "From 29 Oct: …". */
-fun List<Schedule>.describeSteps(): String =
-    if (size == 1) single().describe() else mapIndexed { i, step -> step.describeAsStep(i == lastIndex) }.joinToString("\n")
+fun List<Schedule>.describeSteps(site: DropSite? = null): String =
+    if (size == 1) single().describe(site) else mapIndexed { i, step -> step.describeAsStep(i == lastIndex, site) }.joinToString("\n")
 
-private fun Schedule.describeAsStep(last: Boolean): String {
-    val base = rules.joinToString("; ") { it.describe() }
+private fun Schedule.describeAsStep(last: Boolean, site: DropSite?): String {
+    val base = rules.joinToString("; ") { it.describe(site) }
     val dose = dose?.takeIf { it.isNotBlank() }?.let { "$it, " }.orEmpty()
     val dates = when {
         last && endDate == null -> "from ${startDate.format(DAY_MONTH)}"
@@ -55,15 +55,15 @@ private fun Schedule.describeAsStep(last: Boolean): String {
  * The step that matters on [date] (running now, else the next to start, else the last), described in one line,
  * with "dose 2 of 3" when there are several.
  */
-fun List<Schedule>.describeOn(date: LocalDate): String {
-    if (size == 1) return single().describe()
+fun List<Schedule>.describeOn(date: LocalDate, site: DropSite? = null): String {
+    if (size == 1) return single().describe(site)
     val index = indexOfFirst { it == stepOn(date) }.takeIf { it >= 0 }
         ?: indexOfFirst { it.startDate > date }.takeIf { it >= 0 }
         ?: lastIndex
     val step = this[index]
     val dose = step.dose?.takeIf { it.isNotBlank() }?.let { "$it, " }.orEmpty()
     val until = step.endDate?.let { ", until ${it.format(DAY_MONTH)}" }.orEmpty()
-    return "Dose ${index + 1} of $size: $dose${step.rules.joinToString("; ") { it.describe() }}$until"
+    return "Dose ${index + 1} of $size: $dose${step.rules.joinToString("; ") { it.describe(site) }}$until"
 }
 
 // Editing. Every change re-chains the later steps so they keep their lengths and stay back to back.

@@ -31,7 +31,7 @@ fun ScheduleRule.AfterMeal.withMeal(meal: MealType): ScheduleRule.AfterMeal =
 /** An every-N-hours rule's first dose until the user picks another time. */
 val INTERVAL_FIRST_DOSE: LocalTime = LocalTime.of(6, 0)
 
-/** Switches the rule's type, carrying over the dose times where the new type has them. */
+/** Switches the rule's type, carrying over its side and the dose times where the new type has them. */
 fun ScheduleRule.withKind(kind: ScheduleKind, startDate: LocalDate): ScheduleRule {
     if (this.kind == kind) return this
     val times = when (this) {
@@ -39,7 +39,7 @@ fun ScheduleRule.withKind(kind: ScheduleKind, startDate: LocalDate): ScheduleRul
         is ScheduleRule.Weekdays -> times
         else -> emptyList()
     }.ifEmpty { listOf(LocalTime.of(8, 0)) }
-    return when (kind) {
+    val rule = when (kind) {
         ScheduleKind.DAILY -> ScheduleRule.DailyTimes(times)
         ScheduleKind.WEEKDAYS -> ScheduleRule.Weekdays(
             setOf(DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY), times,
@@ -48,6 +48,7 @@ fun ScheduleRule.withKind(kind: ScheduleKind, startDate: LocalDate): ScheduleRul
         ScheduleKind.INTERVAL -> ScheduleRule.EveryNHours(8, startDate.atTime(INTERVAL_FIRST_DOSE))
         ScheduleKind.AFTER_MEAL -> ScheduleRule.AfterMeal(MealType.BREAKFAST, 0, defaultFallback(MealType.BREAKFAST))
     }
+    return rule.withSide(side)
 }
 
 /** [count] doses spread evenly from 6 AM to 10 PM, to the nearest half hour ("6 times a day"). */
