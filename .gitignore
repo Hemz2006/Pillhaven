@@ -10,3 +10,6 @@ captures/
 # Indian brand list built by tools/build_brand_index.py; the source dataset has no stated licence.
 app/src/main/assets/brands.db
 .firecrawl/
+
+# Visual Studio workspace cache
+.vs/
