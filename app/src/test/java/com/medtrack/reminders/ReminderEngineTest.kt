@@ -333,4 +333,28 @@ class ReminderEngineTest {
         engine.addMealDose(id, "meal:BREAKFAST", at("2026-10-13T09:00"), LocalDate.parse("2026-10-13"), DoseSide(DropSite.EAR, Side.BOTH))
         assertEquals(DoseSide(DropSite.EAR, Side.BOTH), db.doseLogDao().find(id, at("2026-10-13T09:00"))!!.doseSide)
     }
+
+    @Test fun mealDoseOnAnotherSidesTimeKeepsBoth() = runBlocking {
+        // After breakfast +30 min is Left; daily 08:00 is Right. A breakfast at 07:30 puts both at 08:00.
+        val id = db.medicationDao().insert(
+            MedicationEntity(
+                genericName = "M", form = MedForm.DROPS, dropSite = DropSite.EYE,
+                steps = listOf(
+                    Schedule(
+                        listOf(
+                            ScheduleRule.AfterMeal(com.medtrack.schedule.MealType.BREAKFAST, 30, LocalTime.of(10, 0), Side.LEFT),
+                            ScheduleRule.DailyTimes(listOf(LocalTime.of(8, 0)), Side.RIGHT),
+                        ),
+                        LocalDate.parse("2026-10-01"),
+                    ),
+                ),
+                createdAt = now,
+            ),
+        )
+        syncAt("2026-10-13T07:40")
+        engine.addMealDose(id, "meal:BREAKFAST", at("2026-10-13T08:00"), LocalDate.parse("2026-10-13"), DoseSide(DropSite.EYE, Side.LEFT))
+        syncAt("2026-10-13T08:05")
+        val sides = db.doseLogDao().since(Instant.EPOCH).filter { it.medicationId == id }.map { it.doseSide?.side }.toSet()
+        assertEquals(setOf(Side.LEFT, Side.RIGHT), sides)
+    }
 }

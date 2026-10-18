@@ -11,7 +11,10 @@ import com.medtrack.data.coverPhoto
 import com.medtrack.data.displayName
 import com.medtrack.data.doseSide
 import com.medtrack.data.sidedSite
+import com.medtrack.data.sideOf
 import com.medtrack.schedule.DoseSide
+import com.medtrack.schedule.ScheduleRule
+import com.medtrack.schedule.dosesBetween
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.time.Clock
@@ -19,6 +22,8 @@ import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
+
+private const val MAX_SIDE_SHIFTS = 5
 
 /** What [ReminderEngine.undo] needs to reverse a choice: the log and its status before (null = it had no log). */
 data class UndoTarget(val logId: Long, val previous: DoseStatus?)
@@ -96,13 +101,35 @@ class ReminderEngine(
     }
 
     /** A meal was detected: add the dose for the after-meal rule [slot] (it also marks the day handled for that rule's fallback). */
-    suspend fun addMealDose(medicationId: Long, slot: String, dueAt: Instant, forDate: LocalDate, side: DoseSide?) = mutex.withLock {
+    suspend fun addMealDose(medicationId: Long, slot: String, mealDue: Instant, forDate: LocalDate, side: DoseSide?) = mutex.withLock {
         if (doseLogs.existsForSlot(medicationId, slot, forDate)) return@withLock
+        val dueAt = clearOfOtherSides(medicationId, mealDue, side)
         val id = doseLogs.insertIgnore(
             DoseLogEntity(medicationId = medicationId, dueAt = dueAt, status = DoseStatus.PENDING, trigger = DoseTrigger.MEAL, forDate = forDate, slot = slot,
                 dropSite = side?.site, side = side?.side),
         )
         scan(ringNow = if (id > 0 && dueAt <= now()) listOf(id) else emptyList())
+    }
+
+    /**
+     * A meal dose can land on the same minute as another block's dose for a different side (validation only sees the
+     * fallback time). One dose per minute would then silently drop a side, so the meal dose moves a minute later.
+     */
+    private suspend fun clearOfOtherSides(medicationId: Long, dueAt: Instant, side: DoseSide?): Instant {
+        val med = medications.get(medicationId) ?: return dueAt
+        val zone = clock().zone
+        suspend fun clashes(at: Instant): Boolean {
+            doseLogs.find(medicationId, at)?.let { return it.doseSide != side }
+            return med.steps.any { step ->
+                step.rules.any { rule ->
+                    rule !is ScheduleRule.AfterMeal && med.sideOf(rule) != side &&
+                        dosesBetween(step, rule, at.minusMillis(1), at, zone).isNotEmpty()
+                }
+            }
+        }
+        var at = dueAt
+        repeat(MAX_SIDE_SHIFTS) { if (clashes(at)) at = at.plus(Duration.ofMinutes(1)) else return at }
+        return at
     }
 
     private suspend fun setStatus(logIds: List<Long>, status: DoseStatus) = mutex.withLock {

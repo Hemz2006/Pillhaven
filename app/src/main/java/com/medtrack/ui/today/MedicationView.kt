@@ -1,6 +1,6 @@
 package com.medtrack.ui.today
 
-import androidx.compose.ui.text.font.FontWeight
+import com.medtrack.ui.common.SideBadge
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -142,9 +142,7 @@ private fun DoseTile(item: TodayItem, now: Instant, zone: ZoneId, onTick: (Boole
                 },
             )
         }
-        item.side?.let {
-            Text(it.short, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = if (taken) colors.paper else colors.amber)
-        }
+        item.side?.let { SideBadge(it, Modifier.padding(vertical = 2.dp)) }
         val sub = if (taken) item.actedAt?.let { "at " + TIME.format(it.atZone(zone)) } else note
         sub?.let {
             Text(
