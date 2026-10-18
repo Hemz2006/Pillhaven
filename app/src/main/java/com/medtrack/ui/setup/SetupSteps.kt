@@ -29,12 +29,6 @@ enum class SetupStep(val title: String, val body: String, val reassurance: Strin
         "Pillhaven wakes only at dose times, so it uses very little battery.",
         "Allow unrestricted battery",
     ),
-    AUTO_START(
-        "Auto-start",
-        "This phone also stops apps in the background. In its settings, allow Pillhaven to auto-start and run in the background.",
-        "After the phone restarts, reminders resume once you unlock it.",
-        "Open phone settings",
-    ),
     MEALS(
         "Meal reminders (optional)",
         "For medicines taken after a meal: log the meal in a fitness app, and the reminder comes a set time after it.",
@@ -43,24 +37,14 @@ enum class SetupStep(val title: String, val body: String, val reassurance: Strin
     ),
 }
 
-/** Makers whose phones kill background apps unless auto-start is allowed (Realme and OnePlus report their own names). */
-private val AUTO_START_MAKERS = setOf("realme", "oppo", "oneplus", "xiaomi", "redmi", "poco", "vivo", "iqoo", "samsung")
+/** The screens to show: steps already allowed are left out. */
+fun setupSteps(status: SetupStatus): List<SetupStep> = SetupStep.entries.filter { !it.isDone(status) }
 
-/** The screens to show: steps already allowed are left out; auto-start can't be checked, so it shows wherever it applies. */
-fun setupSteps(status: SetupStatus, manufacturer: String): List<SetupStep> =
-    SetupStep.entries.filter { step ->
-        when (step) {
-            SetupStep.AUTO_START -> manufacturer.lowercase() in AUTO_START_MAKERS
-            else -> !step.isDone(status)
-        }
-    }
-
-/** Whether this step's permission is allowed now; auto-start is never known to be. */
+/** Whether this step's permission is allowed now. */
 fun SetupStep.isDone(status: SetupStatus): Boolean = when (this) {
     SetupStep.NOTIFICATIONS -> status.notifications
     SetupStep.EXACT_ALARMS -> status.exactAlarms
     SetupStep.FULL_SCREEN -> status.fullScreen
     SetupStep.BATTERY -> status.batteryUnrestricted
-    SetupStep.AUTO_START -> false
     SetupStep.MEALS -> status.health == HealthStatus.CONNECTED
 }

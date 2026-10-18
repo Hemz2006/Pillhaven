@@ -1,6 +1,5 @@
 package com.medtrack.ui.setup
 
-import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -69,12 +68,11 @@ fun SetupScreen(c: AppContainer, onDone: () -> Unit) {
     var steps by remember { mutableStateOf<List<SetupStep>?>(null) }
     // -1 is the welcome screen; steps.size is "All set".
     var index by remember { mutableIntStateOf(-1) }
-    var openedAutoStart by remember { mutableStateOf(false) }
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { refresh++ }
     LaunchedEffect(refresh) {
         val now = readSetupStatus(context, c.health)
         status = now
-        if (steps == null) steps = setupSteps(now, Build.MANUFACTURER)
+        if (steps == null) steps = setupSteps(now)
         c.appScope.launch { c.refreshReminders() } // e.g. exact alarms were just allowed
     }
     val ask = rememberPermissionRequests(c.health) { refresh++ }
@@ -88,20 +86,18 @@ fun SetupScreen(c: AppContainer, onDone: () -> Unit) {
     Surface(Modifier.fillMaxSize(), color = MaterialTheme.medColors.paper) {
         when {
             index < 0 -> Welcome(onStart = { index = 0 })
-            step == null -> AllSet(skipped = all.filter { !it.isDone(s) && it != SetupStep.AUTO_START }, onDone = onDone)
+            step == null -> AllSet(skipped = all.filter { !it.isDone(s) }, onDone = onDone)
             else -> StepPage(
                 step = step,
                 number = index + 1,
                 count = all.size,
                 health = s.health,
-                openedAutoStart = openedAutoStart,
                 onAllow = {
                     when (step) {
                         SetupStep.NOTIFICATIONS -> ask.notifications()
                         SetupStep.EXACT_ALARMS -> ask.exactAlarms()
                         SetupStep.FULL_SCREEN -> ask.fullScreen()
                         SetupStep.BATTERY -> ask.battery()
-                        SetupStep.AUTO_START -> { ask.autoStart(); openedAutoStart = true }
                         SetupStep.MEALS -> ask.health(s.health)
                     }
                 },
@@ -139,14 +135,11 @@ private fun StepPage(
     number: Int,
     count: Int,
     health: HealthStatus,
-    openedAutoStart: Boolean,
     onAllow: () -> Unit,
     onNext: () -> Unit,
 ) {
     val colors = MaterialTheme.medColors
     val (primary, secondary) = when (step) {
-        // Android can't tell whether auto-start was allowed, so the person says when they're done.
-        SetupStep.AUTO_START -> if (openedAutoStart) "Done" to "Open phone settings again" else step.allowLabel to "Not now"
         SetupStep.MEALS -> when (health) {
             HealthStatus.NOT_INSTALLED -> "Install Health Connect"
             HealthStatus.NEEDS_UPDATE, HealthStatus.NO_BACKGROUND_READ -> "Update Health Connect"
@@ -154,13 +147,7 @@ private fun StepPage(
         } to "Skip"
         else -> step.allowLabel to "Not now"
     }
-    val autoStartDone = step == SetupStep.AUTO_START && openedAutoStart
-    Page(
-        primary = primary,
-        onPrimary = if (autoStartDone) onNext else onAllow,
-        secondary = secondary,
-        onSecondary = if (autoStartDone) onAllow else onNext,
-    ) {
+    Page(primary = primary, onPrimary = onAllow, secondary = secondary, onSecondary = onNext) {
         StepDots(number, count)
         Box(
             Modifier.fillMaxWidth().heightIn(min = 160.dp).background(colors.paperRaised, LabelShape).padding(16.dp),
@@ -235,17 +222,6 @@ private fun StepPicture(step: SetupStep) {
                     Box(Modifier.size(width = 6.dp, height = 16.dp).background(colors.ink))
                 }
                 Text("Unrestricted", style = t.titleMedium, color = colors.taken)
-            }
-            SetupStep.AUTO_START -> Card {
-                Text("Settings › Battery", style = t.bodyMedium, color = colors.inkMuted)
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Allow auto-start", style = t.titleSmall, modifier = Modifier.padding(end = 12.dp))
-                    Icon(Icons.Default.CheckCircle, contentDescription = null, tint = colors.taken)
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Allow background activity", style = t.titleSmall, modifier = Modifier.padding(end = 12.dp))
-                    Icon(Icons.Default.CheckCircle, contentDescription = null, tint = colors.taken)
-                }
             }
             SetupStep.MEALS -> Card {
                 Text("Breakfast logged · 8:10 AM", style = t.bodyMedium, color = colors.inkMuted)

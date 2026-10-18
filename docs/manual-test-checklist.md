@@ -6,7 +6,6 @@ Install: `adb install -r app/build/outputs/apk/debug/app-debug.apk` (USB debuggi
 - [ ] First launch (fresh install) shows "Welcome to Pillhaven", then one screen per permission with "Step N of M": a picture, what it's for and a lock-icon reassurance.
 - [ ] "Allow" opens the right system dialog or page; coming back with it allowed moves to the next screen by itself. "Not now" always moves on. Back goes to the previous screen.
 - [ ] Permissions already allowed (e.g. exact alarms on Android 13+) get no screen, and the step count leaves them out.
-- [ ] On Realme / Oppo / Xiaomi / Vivo / Samsung an "Auto-start" screen opens the app's settings page; after coming back the button reads "Done".
 - [ ] "Meal reminders (optional)" offers Connect / Install / Update Health Connect, with "Skip".
 - [ ] "All set" lists what was skipped and "Go to Today" lands on Today; reopening the app doesn't show the screens again. Settings still lists every permission.
 

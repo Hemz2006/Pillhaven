@@ -47,9 +47,6 @@ class PermissionRequests internal constructor(
 
     fun battery() = context.open(Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, context.packageUri()))
 
-    /** Phone makers hide auto-start in different places; the app's own settings page is the one way in on all of them. */
-    fun autoStart() = context.open(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, context.packageUri()))
-
     /** Connects Health Connect, or opens its store page when it is missing or too old. */
     fun health(status: HealthStatus) {
         if (status == HealthStatus.NOT_CONNECTED) askHealth() else context.openHealthConnectStore()
