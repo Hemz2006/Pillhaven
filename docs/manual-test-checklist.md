@@ -3,7 +3,12 @@
 Install: `adb install -r app/build/outputs/apk/debug/app-debug.apk` (USB debugging on), or copy the APK to the phone and open it.
 
 ## Setup
-- [ ] First launch opens "Set up reminders"; each "Allow" opens the right system screen; statuses update when you come back; "Done" goes to Today. (On Android 13+ exact alarms are granted at install, so the "Exact alarms" row may already show Allowed.)
+- [ ] First launch (fresh install) shows "Welcome to Pillhaven", then one screen per permission with "Step N of M": a picture, what it's for and a lock-icon reassurance.
+- [ ] "Allow" opens the right system dialog or page; coming back with it allowed moves to the next screen by itself. "Not now" always moves on. Back goes to the previous screen.
+- [ ] Permissions already allowed (e.g. exact alarms on Android 13+) get no screen, and the step count leaves them out.
+- [ ] On Realme / Oppo / Xiaomi / Vivo / Samsung an "Auto-start" screen opens the app's settings page; after coming back the button reads "Done".
+- [ ] "Meal reminders (optional)" offers Connect / Install / Update Health Connect, with "Skip".
+- [ ] "All set" lists what was skipped and "Go to Today" lands on Today; reopening the app doesn't show the screens again. Settings still lists every permission.
 
 ## Medications
 - [ ] Add "pantaprazole" (misspelled): a suggestion "pantoprazole" appears; picking it fills ingredients (40 MG …), formula C16H15F2N3O4S and a "Used for" note.

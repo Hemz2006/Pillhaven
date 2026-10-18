@@ -20,12 +20,14 @@ import com.medtrack.ui.detail.DetailScreen
 import com.medtrack.ui.edit.EditMedicationScreen
 import com.medtrack.ui.meds.MedicationsScreen
 import com.medtrack.ui.settings.SettingsScreen
+import com.medtrack.ui.setup.SetupScreen
 import com.medtrack.ui.today.TodayScreen
 
 object Routes {
     const val TODAY = "today"
     const val MEDS = "meds"
     const val SETTINGS = "settings"
+    const val SETUP = "setup"
     const val EDIT = "edit/{id}"
     const val DETAIL = "detail/{id}"
     fun edit(id: Long) = "edit/$id"
@@ -47,7 +49,7 @@ fun MedTrackNav(c: AppContainer, startOnSetup: Boolean) {
     val route = backStack?.destination?.route
     // The island floats over the pages rather than taking a full-width strip of the screen.
     Box(Modifier.fillMaxSize()) {
-        NavHost(nav, startDestination = if (startOnSetup) Routes.SETTINGS else Routes.TODAY, modifier = Modifier.fillMaxSize()) {
+        NavHost(nav, startDestination = if (startOnSetup) Routes.SETUP else Routes.TODAY, modifier = Modifier.fillMaxSize()) {
             composable(Routes.TODAY) {
                 TodayScreen(
                     c,
@@ -60,7 +62,11 @@ fun MedTrackNav(c: AppContainer, startOnSetup: Boolean) {
                 MedicationsScreen(c, onAdd = { nav.navigate(Routes.edit(0)) }, onOpen = { nav.navigate(Routes.detail(it)) })
             }
             composable(Routes.SETTINGS) {
-                SettingsScreen(c, isSetup = !c.prefs.setupDone, onSetupDone = {
+                SettingsScreen(c)
+            }
+            composable(Routes.SETUP) {
+                SetupScreen(c, onDone = {
+                    c.prefs.setupDone = true
                     nav.navigate(Routes.TODAY) { popUpTo(0) { inclusive = true } }
                 })
             }
