@@ -18,6 +18,18 @@ Install: `adb install -r app/build/outputs/apk/debug/app-debug.apk` (USB debuggi
 - [ ] Add "after breakfast" and "after dinner" to one medication (Add another time or meal). Today shows both doses separately; taking breakfast doesn't hide dinner.
 - [ ] Add three photos from the gallery. Detail shows them as a swipeable gallery; "Make main" changes the photo in lists and on the alarm.
 
+## Drops: which side
+- [ ] Add drops with Form → Drops: "Drops for" appears; Save without picking one shows "Choose what the drops are for".
+- [ ] Eye drops, Daily 8:00 AM, no side picked: Save shows "Choose which eye". Pick Left, then "Add another time or meal" 9:00 PM Right: saves.
+- [ ] Two blocks at the same time, Left and Right: Save shows "… is set for two sides – choose Both instead".
+- [ ] Today (By time) shows an amber LEFT EYE / RIGHT EYE badge on each dose; By medication tiles show Left / Right; TalkBack reads "Left eye".
+- [ ] The 9 PM alarm shows PATIENT'S RIGHT EYE and the Left/Right picture with Right filled ("As the patient sees it"), in the chosen alarm colours.
+- [ ] Unlocked, the notification says "Right eye"; on the lock screen it still says only that a medicine is due.
+- [ ] Medications list and the medicine's page read "Daily at 8:00 AM · Left eye; Daily at 9:00 PM · Right eye"; history capsules show Left / Right.
+- [ ] Change the form to Tablet and save: new doses have no side; past history still shows Left / Right.
+- [ ] Ear and nose drops ask "Which ear" / "Which nostril"; "Mouth or other" drops save with no side.
+- [ ] Before/after surgery: two doses (steps), Left until the surgery date, Right from the next day; the alarm follows the date.
+
 ## Reminders
 - [ ] Daily time 2 minutes from now: the alarm rings with sound on the lock screen, full screen, showing photo, dose and notes.
 - [ ] Taken from the notification: the notification clears; Today shows Taken; History shows it.

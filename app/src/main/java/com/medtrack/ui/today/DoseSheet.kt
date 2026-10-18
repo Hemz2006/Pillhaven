@@ -1,5 +1,6 @@
 package com.medtrack.ui.today
 
+import com.medtrack.ui.common.SideBadge
 import com.medtrack.data.doseLineOn
 import com.medtrack.data.title
 import com.medtrack.data.coverPhoto
@@ -56,6 +57,7 @@ fun DoseSheet(
                 Spacer(Modifier.width(16.dp))
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(med.displayName(), style = MaterialTheme.typography.titleLarge)
+                    item.side?.let { SideBadge(it) }
                     med.doseLineOn(item.dueAt.atZone(zone).toLocalDate())?.let {
                         Text(it, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.medColors.inkMuted)
                     }

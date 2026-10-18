@@ -1,5 +1,7 @@
 package com.medtrack.ui.detail
 
+import com.medtrack.data.doseSide
+import com.medtrack.data.sidedSite
 import com.medtrack.ui.common.PhotoCropFlow
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.geometry.CornerRadius
@@ -242,7 +244,7 @@ private fun MyNotesAndSchedule(m: MedicationEntity) {
         }
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Heading("Schedule")
-            Text(m.steps.describeSteps(), style = MaterialTheme.typography.bodyLarge)
+            Text(m.steps.describeSteps(m.sidedSite), style = MaterialTheme.typography.bodyLarge)
         }
     }
 }
@@ -319,11 +321,14 @@ private fun HistoryDayRow(day: HistoryDay, zone: ZoneId) {
                     DoseTrigger.FALLBACK -> ", meal fallback time"
                 }
                 Column(
-                    Modifier.widthIn(min = 48.dp).clearAndSetSemantics { contentDescription = "$time, ${state.spoken}$trigger" },
+                    Modifier.widthIn(min = 48.dp).clearAndSetSemantics {
+                        contentDescription = listOfNotNull("$time, ${state.spoken}$trigger", log.doseSide?.label).joinToString(", ")
+                    },
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Capsule(state, width = 20.dp, height = 32.dp)
                     Text(time, style = MaterialTheme.typography.labelMedium.tabular(), color = MaterialTheme.medColors.inkMuted)
+                    log.doseSide?.let { Text(it.short, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.medColors.ink) }
                 }
             }
         }

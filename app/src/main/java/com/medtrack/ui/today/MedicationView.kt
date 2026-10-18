@@ -1,5 +1,6 @@
 package com.medtrack.ui.today
 
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -118,7 +119,7 @@ private fun DoseTile(item: TodayItem, now: Instant, zone: ZoneId, onTick: (Boole
             .clearAndSetSemantics {
                 role = Role.Checkbox
                 toggleableState = ToggleableState(taken)
-                contentDescription = "${item.medication.displayName()} $time"
+                contentDescription = listOfNotNull(item.medication.displayName(), item.side?.label, time).joinToString(" ")
                 stateDescription = spoken
                 if (enabled) onLongClick("More actions") { onMore(); true } else disabled()
             }
@@ -140,6 +141,9 @@ private fun DoseTile(item: TodayItem, now: Instant, zone: ZoneId, onTick: (Boole
                     else -> colors.ink
                 },
             )
+        }
+        item.side?.let {
+            Text(it.short, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = if (taken) colors.paper else colors.amber)
         }
         val sub = if (taken) item.actedAt?.let { "at " + TIME.format(it.atZone(zone)) } else note
         sub?.let {

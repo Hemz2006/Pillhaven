@@ -1,5 +1,8 @@
 package com.medtrack.reminders
 
+import com.medtrack.data.doseSide
+import com.medtrack.ui.common.SidePicture
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.luminance
@@ -120,6 +123,14 @@ private fun AlarmDose(c: AppContainer, log: DoseLogEntity, med: MedicationEntity
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         if (single) PhotoHeader(med.coverPhoto, med.title) else PhotoThumb(med.coverPhoto, med.title, 120.dp, form = med.form)
         Text(med.displayName(), style = MaterialTheme.typography.displaySmall)
+        log.doseSide?.let {
+            Text(
+                it.patientLabel.uppercase(),
+                style = MaterialTheme.typography.displaySmall,
+                fontWeight = FontWeight.Bold,
+            )
+            SidePicture(it, onLit = LocalAlarmBackground.current)
+        }
         med.doseLineOn(log.forDate)?.let {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 FormIcon(med.form, Modifier.padding(end = 8.dp), size = 28.dp, tint = LocalContentColor.current)

@@ -1,5 +1,6 @@
 package com.medtrack.ui.today
 
+import com.medtrack.ui.common.SideBadge
 import com.medtrack.ui.common.FormIcon
 import com.medtrack.data.doseLineOn
 import com.medtrack.data.title
@@ -84,7 +85,10 @@ fun DoseRow(
         PhotoThumb(item.medication.coverPhoto, item.medication.title, 40.dp, form = item.medication.form)
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(item.medication.displayName(), style = MaterialTheme.typography.titleSmall)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text(item.medication.displayName(), style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f, fill = false))
+                item.side?.let { SideBadge(it) }
+            }
             detailLine(item, zone)?.let {
                 Row(verticalAlignment = Alignment.Top) {
                     FormIcon(item.medication.form, Modifier.padding(top = 1.dp, end = 6.dp))

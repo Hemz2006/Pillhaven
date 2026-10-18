@@ -1,5 +1,6 @@
 package com.medtrack.ui.meds
 
+import com.medtrack.data.sidedSite
 import com.medtrack.ui.common.OrderButton
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.semantics.contentDescription
@@ -104,7 +105,7 @@ private fun MedicationRow(med: MedicationEntity, onClick: () -> Unit) {
                     Text(it, style = MaterialTheme.typography.bodyMedium, color = colors.inkMuted)
                 }
             }
-            Text(med.steps.describeOn(java.time.LocalDate.now()), style = MaterialTheme.typography.bodyMedium, color = if (med.active) colors.ink else colors.inkMuted)
+            Text(med.steps.describeOn(java.time.LocalDate.now(), med.sidedSite), style = MaterialTheme.typography.bodyMedium, color = if (med.active) colors.ink else colors.inkMuted)
             if (!med.active) TextTag("Paused", colors.inkMuted, Modifier.padding(top = 4.dp))
         }
         OrderButton(med)
