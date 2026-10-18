@@ -1,5 +1,6 @@
 package com.medtrack.ui.edit
 
+import com.medtrack.data.sidedSite
 import com.medtrack.ui.common.PhotoSources
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -121,8 +122,10 @@ fun EditMedicationScreen(c: AppContainer, id: Long, onDone: () -> Unit) {
                 FormAndDose(
                     form = med.form,
                     dose = med.doseText.orEmpty(),
+                    dropSite = med.dropSite,
                     onForm = { f -> vm.update { it.copy(form = f) } },
                     onDose = { d -> vm.update { it.copy(doseText = d) } },
+                    onDropSite = { s -> vm.update { it.copy(dropSite = s) } },
                 )
             }
 
@@ -147,7 +150,7 @@ fun EditMedicationScreen(c: AppContainer, id: Long, onDone: () -> Unit) {
             }
 
             Section("Schedule") {
-                ScheduleEditor(med.steps, med.doseText) { s -> vm.update { it.copy(steps = s) } }
+                ScheduleEditor(med.steps, med.doseText, med.sidedSite) { s -> vm.update { it.copy(steps = s) } }
             }
 
             Button(onClick = vm::save, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) { Text("Save") }

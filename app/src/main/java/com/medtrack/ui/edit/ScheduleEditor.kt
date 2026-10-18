@@ -1,5 +1,10 @@
 package com.medtrack.ui.edit
 
+import com.medtrack.schedule.DropSite
+import com.medtrack.schedule.Side
+import com.medtrack.schedule.question
+import com.medtrack.schedule.withSide
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.heading
 import androidx.compose.material3.HorizontalDivider
@@ -77,16 +82,16 @@ import java.util.Locale
  * then 4 times a day for 2 weeks…), each with its own length, dose and timings.
  */
 @Composable
-fun ScheduleEditor(steps: List<Schedule>, usualDose: String?, onChange: (List<Schedule>) -> Unit) {
+fun ScheduleEditor(steps: List<Schedule>, usualDose: String?, site: DropSite?, onChange: (List<Schedule>) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         if (steps.size == 1) {
             val step = steps.single()
-            StepRules(step) { onChange(listOf(it)) }
+            StepRules(step, site) { onChange(listOf(it)) }
             DateRow("Start date", step.startDate, clearable = false) { it?.let { d -> onChange(steps.withFirstStart(d)) } }
             DaysField("For how many days (optional)", step.lengthDays, allowBlank = true) { onChange(steps.withStepLength(0, it)) }
             LastDay(step)
         } else {
-            steps.indices.forEach { index -> StepBlock(index, steps, usualDose, onChange) }
+            steps.indices.forEach { index -> StepBlock(index, steps, usualDose, site, onChange) }
         }
         OutlinedButton(onClick = { onChange(steps.withAddedStep()) }, modifier = Modifier.heightIn(min = 48.dp)) {
             Icon(Icons.Default.Add, null, Modifier.size(18.dp))
@@ -104,7 +109,7 @@ fun ScheduleEditor(steps: List<Schedule>, usualDose: String?, onChange: (List<Sc
 }
 
 @Composable
-private fun StepBlock(index: Int, steps: List<Schedule>, usualDose: String?, onChange: (List<Schedule>) -> Unit) {
+private fun StepBlock(index: Int, steps: List<Schedule>, usualDose: String?, site: DropSite?, onChange: (List<Schedule>) -> Unit) {
     val step = steps[index]
     val last = index == steps.lastIndex
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -136,19 +141,20 @@ private fun StepBlock(index: Int, steps: List<Schedule>, usualDose: String?, onC
             colors = fieldColors(),
             modifier = Modifier.fillMaxWidth(),
         )
-        StepRules(step) { onChange(steps.withStep(index, it)) }
+        StepRules(step, site) { onChange(steps.withStep(index, it)) }
         HorizontalDivider(color = MaterialTheme.medColors.foil)
     }
 }
 
 /** A step's rules (e.g. after breakfast and after dinner). */
 @Composable
-private fun StepRules(schedule: Schedule, onChange: (Schedule) -> Unit) {
+private fun StepRules(schedule: Schedule, site: DropSite?, onChange: (Schedule) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         schedule.rules.forEachIndexed { index, rule ->
             RuleBlock(
                 rule = rule,
                 startDate = schedule.startDate,
+                site = site,
                 onChange = { onChange(schedule.withRule(index, it)) },
                 onRemove = if (schedule.rules.size > 1) ({ onChange(schedule.withoutRule(index)) }) else null,
             )
@@ -192,7 +198,7 @@ private fun DaysField(label: String, days: Int?, allowBlank: Boolean, onChange: 
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun RuleBlock(rule: ScheduleRule, startDate: LocalDate, onChange: (ScheduleRule) -> Unit, onRemove: (() -> Unit)?) {
+private fun RuleBlock(rule: ScheduleRule, startDate: LocalDate, site: DropSite?, onChange: (ScheduleRule) -> Unit, onRemove: (() -> Unit)?) {
     Column(
         Modifier.fillMaxWidth()
             .clip(LabelShape)
@@ -202,8 +208,8 @@ private fun RuleBlock(rule: ScheduleRule, startDate: LocalDate, onChange: (Sched
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(rule.describe(), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f).padding(top = 8.dp))
-            if (onRemove != null) IconButton(onClick = onRemove) { Icon(Icons.Default.Close, "Remove ${rule.describe()}") }
+            Text(rule.describe(site), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f).padding(top = 8.dp))
+            if (onRemove != null) IconButton(onClick = onRemove) { Icon(Icons.Default.Close, "Remove ${rule.describe(site)}") }
         }
         Column(Modifier.padding(end = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -252,6 +258,7 @@ private fun RuleBlock(rule: ScheduleRule, startDate: LocalDate, onChange: (Sched
                     )
                 }
             }
+            if (site != null) SidePicker(site, rule.side) { onChange(rule.withSide(it)) }
         }
     }
 }
@@ -328,4 +335,22 @@ private fun DateRow(label: String, date: LocalDate?, clearable: Boolean, onChang
         if (clearable && date != null) TextButton(onClick = { onChange(null) }) { Text("Clear") }
     }
     if (picking) DatePickDialog(date ?: LocalDate.now(), onDismiss = { picking = false }) { picking = false; onChange(it) }
+}
+
+/** Left / Right / Both for one block's doses; the chosen side is amber, like the badge on Today and the alarm. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun SidePicker(site: DropSite, side: Side?, onChange: (Side) -> Unit) {
+    val colors = MaterialTheme.medColors
+    Text(site.question(), style = MaterialTheme.typography.bodyLarge, color = colors.inkMuted)
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Side.entries.forEach { s ->
+            FilterChip(
+                selected = side == s,
+                onClick = { onChange(s) },
+                label = { Text(s.name.lowercase().replaceFirstChar { it.uppercase() }) },
+                colors = FilterChipDefaults.filterChipColors(selectedContainerColor = colors.amber, selectedLabelColor = colors.onAmber),
+            )
+        }
+    }
 }

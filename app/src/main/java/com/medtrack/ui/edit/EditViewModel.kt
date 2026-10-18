@@ -1,5 +1,6 @@
 package com.medtrack.ui.edit
 
+import com.medtrack.data.sideValidationError
 import com.medtrack.data.title
 import com.medtrack.lookup.readTextIn
 import android.util.Log
@@ -244,7 +245,7 @@ class EditViewModel(private val c: AppContainer, private val id: Long) : ViewMod
         val current = _state.value
         if (current.saving || current.saved) return
         val med = current.med
-        val error = if (med.genericName.isBlank() && med.brandName.isNullOrBlank()) "Enter the medicine's name" else med.steps.stepsValidationError()
+        val error = if (med.genericName.isBlank() && med.brandName.isNullOrBlank()) "Enter the medicine's name" else med.steps.stepsValidationError() ?: med.sideValidationError()
         if (error != null) {
             _state.update { it.copy(error = error) }
             return
