@@ -5,7 +5,10 @@ import android.database.sqlite.SQLiteDatabase
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.medtrack.schedule.DoseSide
+import com.medtrack.schedule.DropSite
 import com.medtrack.schedule.MealType
+import com.medtrack.schedule.Side
 import com.medtrack.schedule.ScheduleRule
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -58,7 +61,7 @@ class MigrationTest {
     }
 
     @Test fun keepsMedicationsPhotosAndLogs() = runBlocking {
-        val db = Room.databaseBuilder(context, MedTrackDatabase::class.java, name).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4).allowMainThreadQueries().build()
+        val db = Room.databaseBuilder(context, MedTrackDatabase::class.java, name).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5).allowMainThreadQueries().build()
         try {
             val pan = db.medicationDao().get(1)!!
             assertEquals("Pan 40", pan.brandName)
@@ -76,9 +79,20 @@ class MigrationTest {
             assertEquals(listOf("meal:BREAKFAST", null), logs.map { it.slot })
             assertEquals(DoseStatus.TAKEN, logs.first().status)
 
+            // v5: no medication says what drops are for, and no old dose has a side.
+            assertEquals(null, pan.dropSite)
+            assertEquals(listOf(null, null), logs.map { it.doseSide })
+
             // Foreign keys still work after the table was rebuilt.
             db.medicationDao().delete(metformin)
             assertEquals(listOf(1L), db.doseLogDao().since(Instant.EPOCH).map { it.medicationId })
+
+            // New doses keep their side.
+            db.doseLogDao().insertIgnore(
+                DoseLogEntity(medicationId = 1, dueAt = Instant.ofEpochMilli(9000), status = DoseStatus.PENDING, trigger = DoseTrigger.SCHEDULE,
+                    forDate = LocalDate.parse("2026-10-14"), dropSite = DropSite.EYE, side = Side.RIGHT),
+            )
+            assertEquals(DoseSide(DropSite.EYE, Side.RIGHT), db.doseLogDao().find(1, Instant.ofEpochMilli(9000))!!.doseSide)
         } finally {
             db.close()
         }

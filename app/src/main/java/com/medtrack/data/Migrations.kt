@@ -56,6 +56,15 @@ val MIGRATION_3_4 = object : Migration(3, 4) {
     }
 }
 
+/** v5: what drops are for, and each dose's side (left/right/both). Existing rows have neither. */
+val MIGRATION_4_5 = object : Migration(4, 5) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE medications ADD COLUMN `dropSite` TEXT")
+        db.execSQL("ALTER TABLE dose_logs ADD COLUMN `dropSite` TEXT")
+        db.execSQL("ALTER TABLE dose_logs ADD COLUMN `side` TEXT")
+    }
+}
+
 private val json = Json { ignoreUnknownKeys = true }
 
 /** v1 stored one rule as `"rule": {...}`; v2 stores `"rules": [{...}]`. */

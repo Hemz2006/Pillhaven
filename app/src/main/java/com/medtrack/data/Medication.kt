@@ -3,8 +3,11 @@ package com.medtrack.data
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.medtrack.schedule.DoseSide
+import com.medtrack.schedule.DropSite
 import com.medtrack.schedule.Schedule
 import com.medtrack.schedule.ScheduleRule
+import com.medtrack.schedule.sidesValidationError
 import com.medtrack.schedule.stepOn
 import kotlinx.serialization.Serializable
 import java.time.Instant
@@ -25,6 +28,8 @@ data class MedicationEntity(
     val doseText: String? = null,
     /** Null for medications saved before forms existed, or when the user hasn't said. */
     val form: MedForm? = null,
+    /** What drops are for (eye, ear, nose…); null for other forms, or drops saved before this was asked. */
+    val dropSite: DropSite? = null,
     val notes: String? = null,
     val ingredients: List<Ingredient> = emptyList(),
     val usedFor: String? = null,
@@ -57,6 +62,18 @@ fun MedicationEntity.doseOn(date: LocalDate): String? =
 /** "Inhaler · 2 puffs": how it's taken on [date], for lists, Today and alarms; null when neither is known. */
 fun MedicationEntity.doseLineOn(date: LocalDate): String? =
     listOfNotNull(form?.label, doseOn(date)).joinToString(" · ").ifEmpty { null }
+
+/** The site when this medicine's doses have sides: drops for an eye, ear or nose. */
+val MedicationEntity.sidedSite: DropSite?
+    get() = dropSite?.takeIf { form == MedForm.DROPS && it.sided }
+
+/** Where a dose of [rule] goes, or null when this medicine's doses have no side. */
+fun MedicationEntity.sideOf(rule: ScheduleRule): DoseSide? =
+    sidedSite?.let { site -> rule.side?.let { DoseSide(site, it) } }
+
+/** Why the drops' site or sides can't be saved, or null. */
+fun MedicationEntity.sideValidationError(): String? =
+    if (form == MedForm.DROPS && dropSite == null) "Choose what the drops are for" else steps.sidesValidationError(sidedSite)
 
 fun MedicationEntity.displayName(): String = subtitle?.let { "$title ($it)" } ?: title
 

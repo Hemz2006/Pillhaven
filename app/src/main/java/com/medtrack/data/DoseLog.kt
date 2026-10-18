@@ -4,6 +4,9 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.medtrack.schedule.DoseSide
+import com.medtrack.schedule.DropSite
+import com.medtrack.schedule.Side
 import java.time.Instant
 import java.time.LocalDate
 
@@ -35,4 +38,10 @@ data class DoseLogEntity(
     val snoozedUntil: Instant? = null,
     /** [com.medtrack.schedule.slot] of the after-meal rule this dose belongs to; null for clock-time doses. */
     val slot: String? = null,
+    /** Where this dose went, recorded when it was made so later edits to the medicine don't rewrite history. */
+    val dropSite: DropSite? = null,
+    val side: Side? = null,
 )
+
+val DoseLogEntity.doseSide: DoseSide?
+    get() = if (dropSite != null && side != null) DoseSide(dropSite, side) else null

@@ -9,6 +9,7 @@ import com.medtrack.data.AppPrefs
 import com.medtrack.data.MIGRATION_1_2
 import com.medtrack.data.MIGRATION_2_3
 import com.medtrack.data.MIGRATION_3_4
+import com.medtrack.data.MIGRATION_4_5
 import com.medtrack.data.MedTrackDatabase
 import com.medtrack.data.MedicationRepository
 import com.medtrack.data.PhotoStore
@@ -33,7 +34,7 @@ class AppContainer(context: Context) {
     private val appContext = context.applicationContext
     val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default + CoroutineExceptionHandler { _, e -> Log.e("MedTrack", "Unhandled error in appScope", e) })
     val db: MedTrackDatabase = Room.databaseBuilder(context, MedTrackDatabase::class.java, "medtrack.db")
-        .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+        .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
         .build()
     val prefs = AppPrefs(context)
 
