@@ -31,9 +31,9 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
                 val id = c.getLong(0)
                 val schedule = migrateScheduleJson(c.getString(1))
                 val photo = if (c.isNull(2)) null else c.getString(2)
-                db.execSQL("UPDATE medications_new SET schedule = ?, photos = ? WHERE id = ?", arrayOf(schedule, photosJson(photo), id))
+                db.execSQL("UPDATE medications_new SET schedule = ?, photos = ? WHERE id = ?", arrayOf<Any>(schedule, photosJson(photo), id))
                 mealSlot(schedule)?.let { slot ->
-                    db.execSQL("UPDATE dose_logs SET slot = ? WHERE medicationId = ?", arrayOf(slot, id))
+                    db.execSQL("UPDATE dose_logs SET slot = ? WHERE medicationId = ?", arrayOf<Any>(slot, id))
                 }
             }
         }

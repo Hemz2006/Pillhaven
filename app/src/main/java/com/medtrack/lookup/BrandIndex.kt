@@ -26,17 +26,7 @@ class BrandIndex(private val context: Context) {
         val key = brandKey(term)
         if (key.length < 2) return@withContext emptyList()
         val database = open() ?: return@withContext emptyList()
-        val candidates = database.rawQuery(
-            "SELECT b.name, c.text, m.name, b.discontinued FROM brands b " +
-                "JOIN compositions c ON c.id = b.composition LEFT JOIN makers m ON m.id = b.maker " +
-                "WHERE b.key >= ? AND b.key < ? LIMIT 400",
-            arrayOf(key, "$key{"), // '{' sorts just after 'z', and keys hold only [a-z0-9]
-        ).use { c ->
-            buildList {
-                while (c.moveToNext()) add(Candidate(Brand(c.getString(0), c.getString(1), c.getString(2)), c.getInt(3) == 1))
-            }
-        }
-        rankBrands(term, candidates).take(limit)
+        rankBrands(term, brandsFrom(database, key, max = 400)).take(limit)
     }
 
     /**
@@ -59,12 +49,16 @@ class BrandIndex(private val context: Context) {
         combineMatches(byBrand, matchGeneric(database, text, own))
     }
 
-    /** Brands whose search key starts with [prefix] (at most 3000). */
-    private fun brandsFrom(db: SQLiteDatabase, prefix: String): List<Candidate> = db.rawQuery(
+    /** Brands whose search key starts with [prefix] ('{' sorts just after 'z', and keys hold only [a-z0-9]). */
+    private fun brandsFrom(db: SQLiteDatabase, prefix: String, max: Int = 3000): List<Candidate> =
+        db.candidates("b.key >= ? AND b.key < ?", arrayOf(prefix, "$prefix{"), max)
+
+    /** Brands (with composition and maker) matching [where], at most [max]. */
+    private fun SQLiteDatabase.candidates(where: String, args: Array<String>, max: Int): List<Candidate> = rawQuery(
         "SELECT b.name, c.text, m.name, b.discontinued FROM brands b " +
             "JOIN compositions c ON c.id = b.composition LEFT JOIN makers m ON m.id = b.maker " +
-            "WHERE b.key >= ? AND b.key < ? LIMIT 3000",
-        arrayOf(prefix, "$prefix{"),
+            "WHERE $where LIMIT $max",
+        args,
     ).use { c ->
         buildList {
             while (c.moveToNext()) add(Candidate(Brand(c.getString(0), c.getString(1), c.getString(2)), c.getInt(3) == 1))
@@ -76,16 +70,7 @@ class BrandIndex(private val context: Context) {
         val strengths = strengthsIn(text)
         val form = formIn(text)
         return possibleNames(text).filter { it.word.length >= 6 }.mapNotNull { read ->
-            val listed = database?.rawQuery(
-                "SELECT b.name, c.text, m.name, b.discontinued FROM compositions c " +
-                    "JOIN brands b ON b.composition = c.id LEFT JOIN makers m ON m.id = b.maker " +
-                    "WHERE c.text LIKE ? LIMIT 3000",
-                arrayOf("%${read.word}%"),
-            )?.use { c ->
-                buildList {
-                    while (c.moveToNext()) add(Candidate(Brand(c.getString(0), c.getString(1), c.getString(2)), c.getInt(3) == 1))
-                }
-            }.orEmpty()
+            val listed = database?.candidates("c.text LIKE ?", arrayOf("%${read.word}%"), max = 3000).orEmpty()
             brandsWithIngredient(read.word, strengths, form, own + listed).takeIf { it.isNotEmpty() }?.let { TextMatch(read.word, it) }
         }.distinctBy { match -> match.brands.first().name.lowercase() }
     }
