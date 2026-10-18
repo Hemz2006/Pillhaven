@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- The splash video's background, shown by the system before the video starts so the hand-over is seamless. -->
-    <color name="splash">#FFFFFF</color>
+    <color name="splash">#F6F8F3</color>
 </resources>

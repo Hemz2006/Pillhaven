@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- App icon: the glossy capsule-and-clock artwork, cropped so the launcher's mask shows the art and the dark tile.
-     The monochrome layer is used when the phone's themed icons are on. -->
+<!-- App icon: Pillhaven's green house with a capsule inside, on the artwork's off-white tile. The monochrome layer
+     (the same shapes in one colour) is used when the phone's themed icons are on. -->
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
     <background android:drawable="@color/ic_launcher_background" />
     <foreground android:drawable="@mipmap/ic_launcher_foreground" />
-    <monochrome android:drawable="@drawable/ic_launcher_monochrome" />
+    <monochrome android:drawable="@mipmap/ic_launcher_monochrome" />
 </adaptive-icon>

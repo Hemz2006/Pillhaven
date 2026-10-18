@@ -32,8 +32,8 @@ import com.medtrack.R
 import kotlinx.coroutines.delay
 
 /** The videos' own background colours (the system launch screen uses the same, as @color/splash). */
-private val SplashLight = Color(0xFFFFFFFF)
-private val SplashDark = Color(0xFF04080A)
+private val SplashLight = Color(0xFFF6F8F3)
+private val SplashDark = Color(0xFF070906)
 
 /** Both videos are 1080 × 2340. */
 private const val VIDEO_RATIO = 1080f / 2340f

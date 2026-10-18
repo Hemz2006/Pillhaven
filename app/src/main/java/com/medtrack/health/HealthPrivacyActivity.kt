@@ -21,9 +21,9 @@ class HealthPrivacyActivity : ComponentActivity() {
             MedTrackTheme {
                 Scaffold { padding ->
                     Column(Modifier.padding(padding).padding(16.dp)) {
-                        Text("How MedTrack uses Health Connect", style = MaterialTheme.typography.titleLarge)
+                        Text("How Pillhaven uses Health Connect", style = MaterialTheme.typography.titleLarge)
                         Text(
-                            "MedTrack only reads the meals you log (nutrition records), including in the background, " +
+                            "Pillhaven only reads the meals you log (nutrition records), including in the background, " +
                                 "to remind you to take medications marked \"after meal\". It never writes to Health Connect, " +
                                 "and the data stays on this phone.",
                             Modifier.padding(top = 12.dp),

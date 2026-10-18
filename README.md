@@ -1,4 +1,4 @@
-# MedTrack
+# Pillhaven
 
 A personal Android app for keeping track of your medicines and getting reminded to take them. It's built for Indian brands: type the name on the pack and the app fills in what's in it.
 
@@ -42,8 +42,8 @@ You need Android 9 or newer.
 
    This is the optimised build: much faster than the debug build, and its data can't be read over USB. It's signed with your local debug key, so it updates a debug install in place.
 
-5. Open MedTrack and go to **Settings**. Allow notifications, alarms, full-screen alarms and unrestricted battery.
-   - On Realme, Oppo, Xiaomi, Vivo and Samsung phones, also allow MedTrack to **auto-start** and **run in the background** in the phone's battery settings.
+5. Open Pillhaven and go to **Settings**. Allow notifications, alarms, full-screen alarms and unrestricted battery.
+   - On Realme, Oppo, Xiaomi, Vivo and Samsung phones, also allow Pillhaven to **auto-start** and **run in the background** in the phone's battery settings.
    - Without these, reminders may not ring.
 
 After the phone restarts, reminders resume once you unlock it.

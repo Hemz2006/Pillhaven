@@ -100,7 +100,7 @@ fun SettingsScreen(c: AppContainer, isSetup: Boolean, onSetupDone: () -> Unit) {
         Column(Modifier.padding(padding).verticalScroll(rememberScrollState()).padding(vertical = 8.dp)) {
             if (isSetup) {
                 Text(
-                    "MedTrack needs a few permissions so reminders ring on time, even when your phone is locked or asleep.",
+                    "Pillhaven needs a few permissions so reminders ring on time, even when your phone is locked or asleep.",
                     Modifier.padding(horizontal = 16.dp),
                 )
             }
@@ -131,7 +131,7 @@ fun SettingsScreen(c: AppContainer, isSetup: Boolean, onSetupDone: () -> Unit) {
                 context.open(Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, context.packageUri()))
             }
             Text(
-                "On Xiaomi, Oppo, Vivo and Samsung phones, also allow MedTrack to auto-start and run in the background in the phone's battery settings. After the phone restarts, reminders resume once you unlock it.",
+                "On Xiaomi, Oppo, Vivo and Samsung phones, also allow Pillhaven to auto-start and run in the background in the phone's battery settings. After the phone restarts, reminders resume once you unlock it.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.medColors.inkMuted,
                 modifier = Modifier.padding(16.dp),
@@ -145,7 +145,7 @@ fun SettingsScreen(c: AppContainer, isSetup: Boolean, onSetupDone: () -> Unit) {
                 HealthStatus.NO_BACKGROUND_READ ->
                     "This Health Connect version can't read meals in the background. Update it." to ("Update" to { context.openHealthConnectStore() })
                 HealthStatus.NOT_CONNECTED -> "Not connected." to ("Connect" to { healthPermissions.launch(c.health.permissions) })
-                HealthStatus.CONNECTED -> "Connected. MedTrack reads the meals you log." to null
+                HealthStatus.CONNECTED -> "Connected. Pillhaven reads the meals you log." to null
             }
             ListItem(
                 headlineContent = { Text("Health Connect", style = MaterialTheme.typography.titleMedium) },

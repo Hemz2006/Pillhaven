@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- The artwork's dark tile, shown behind the foreground during launcher animations. -->
-    <color name="ic_launcher_background">#0E171B</color>
+    <!-- The artwork's off-white tile, behind the house-and-capsule foreground. -->
+    <color name="ic_launcher_background">#F8FAF5</color>
 </resources>
