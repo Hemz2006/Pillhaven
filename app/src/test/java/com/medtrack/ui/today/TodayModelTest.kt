@@ -1,5 +1,9 @@
 package com.medtrack.ui.today
 
+import com.medtrack.schedule.DoseSide
+import com.medtrack.schedule.DropSite
+import com.medtrack.schedule.Side
+import com.medtrack.data.MedForm
 import com.medtrack.data.doseOn
 import com.medtrack.data.DoseLogEntity
 import com.medtrack.data.DoseStatus
@@ -140,5 +144,21 @@ class TodayModelTest {
         assertEquals(listOf<DoseStatus?>(null, null), tomorrow.map { it.status })
         assertEquals(DayProgress(0, 2), tomorrow.progress())
         assertEquals("Tomorrow", dayName(LocalDate.parse("2026-10-14"), LocalDate.parse("2026-10-13")))
+    }
+
+    @Test fun itemsCarrySide() {
+        val eyes = MedicationEntity(
+            3, "M", form = MedForm.DROPS, dropSite = DropSite.EYE,
+            steps = listOf(
+                Schedule(listOf(ScheduleRule.DailyTimes(listOf(LocalTime.of(8, 0)), Side.LEFT), ScheduleRule.DailyTimes(listOf(LocalTime.of(21, 0)), Side.RIGHT)), start),
+            ),
+            createdAt = Instant.EPOCH,
+        )
+        val upcoming = buildToday(listOf(eyes), emptyList(), at("2026-10-13T07:00"), zone)
+        assertEquals(listOf(DoseSide(DropSite.EYE, Side.LEFT), DoseSide(DropSite.EYE, Side.RIGHT)), upcoming.map { it.side })
+        // A recorded dose keeps the side it was given, even after the schedule changes.
+        val log = DoseLogEntity(7, 3, at("2026-10-13T21:00"), DoseStatus.TAKEN, DoseTrigger.SCHEDULE, LocalDate.parse("2026-10-13"), dropSite = DropSite.EYE, side = Side.RIGHT)
+        val changed = eyes.copy(steps = listOf(Schedule(ScheduleRule.DailyTimes(listOf(LocalTime.of(21, 0)), Side.LEFT), start)))
+        assertEquals(DoseSide(DropSite.EYE, Side.RIGHT), buildToday(listOf(changed), listOf(log), at("2026-10-13T22:00"), zone).single().side)
     }
 }

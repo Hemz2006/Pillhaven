@@ -28,7 +28,7 @@ import java.time.ZoneId
 
 /** Takes or skips a dose; returns what undo needs, or null when nothing changed. */
 internal suspend fun recordDose(c: AppContainer, item: TodayItem, status: DoseStatus): UndoTarget? {
-    val logId = item.logId ?: return c.engine.recordUpcoming(item.medication.id, item.dueAt, status, item.slot)
+    val logId = item.logId ?: return c.engine.recordUpcoming(item.medication.id, item.dueAt, status, item.slot, item.side)
     val previous = item.status ?: return null
     if (previous == status) return null
     if (status == DoseStatus.TAKEN) c.engine.markTaken(logId) else c.engine.markSkipped(logId)

@@ -9,6 +9,9 @@ import com.medtrack.data.DoseTrigger
 import com.medtrack.data.MedicationDao
 import com.medtrack.data.coverPhoto
 import com.medtrack.data.displayName
+import com.medtrack.data.doseSide
+import com.medtrack.data.sidedSite
+import com.medtrack.schedule.DoseSide
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.time.Clock
@@ -52,12 +55,13 @@ class ReminderEngine(
      * Taken/skipped from the Today screen before the dose rang; stops it ringing later.
      * Returns what [undo] needs to reverse it, or null when nothing changed (the dose was already handled).
      */
-    suspend fun recordUpcoming(medicationId: Long, dueAt: Instant, status: DoseStatus, slot: String?): UndoTarget? = mutex.withLock {
+    suspend fun recordUpcoming(medicationId: Long, dueAt: Instant, status: DoseStatus, slot: String?, side: DoseSide?): UndoTarget? = mutex.withLock {
         val at = now()
         val id = doseLogs.insertIgnore(
             DoseLogEntity(
                 medicationId = medicationId, dueAt = dueAt, status = status, trigger = DoseTrigger.SCHEDULE,
                 forDate = dueAt.atZone(clock().zone).toLocalDate(), actedAt = at, slot = slot,
+                dropSite = side?.site, side = side?.side,
             ),
         )
         val target = if (id > 0) {
@@ -92,10 +96,11 @@ class ReminderEngine(
     }
 
     /** A meal was detected: add the dose for the after-meal rule [slot] (it also marks the day handled for that rule's fallback). */
-    suspend fun addMealDose(medicationId: Long, slot: String, dueAt: Instant, forDate: LocalDate) = mutex.withLock {
+    suspend fun addMealDose(medicationId: Long, slot: String, dueAt: Instant, forDate: LocalDate, side: DoseSide?) = mutex.withLock {
         if (doseLogs.existsForSlot(medicationId, slot, forDate)) return@withLock
         val id = doseLogs.insertIgnore(
-            DoseLogEntity(medicationId = medicationId, dueAt = dueAt, status = DoseStatus.PENDING, trigger = DoseTrigger.MEAL, forDate = forDate, slot = slot),
+            DoseLogEntity(medicationId = medicationId, dueAt = dueAt, status = DoseStatus.PENDING, trigger = DoseTrigger.MEAL, forDate = forDate, slot = slot,
+                dropSite = side?.site, side = side?.side),
         )
         scan(ringNow = if (id > 0 && dueAt <= now()) listOf(id) else emptyList())
     }
@@ -124,7 +129,7 @@ class ReminderEngine(
             .mapValues { (_, dates) -> dates.toSet() }
 
         val plan = planScan(
-            meds = meds.flatMap { med -> med.steps.map { MedSchedule(med.id, it) } },
+            meds = meds.flatMap { med -> med.steps.map { MedSchedule(med.id, it, med.sidedSite) } },
             handledDates = handled,
             pending = pendingActive.map { PendingDose(it.id, it.medicationId, it.dueAt, it.snoozedUntil) },
             lastScanAt = lastScan,
@@ -135,10 +140,10 @@ class ReminderEngine(
         // Whatever fails below, the next wake-up must still be booked or later doses would be lost.
         try {
             val inserted = plan.newDoses.map {
-                doseLogs.insertIgnore(DoseLogEntity(medicationId = it.medicationId, dueAt = it.dueAt, status = DoseStatus.PENDING, trigger = it.trigger, forDate = it.dueAt.atZone(zone).toLocalDate(), slot = it.slot))
+                doseLogs.insertIgnore(DoseLogEntity(medicationId = it.medicationId, dueAt = it.dueAt, status = DoseStatus.PENDING, trigger = it.trigger, forDate = it.dueAt.atZone(zone).toLocalDate(), slot = it.slot, dropSite = it.side?.site, side = it.side?.side))
             }.filter { it > 0 }
             plan.missedDoses.forEach {
-                doseLogs.insertIgnore(DoseLogEntity(medicationId = it.medicationId, dueAt = it.dueAt, status = DoseStatus.MISSED, trigger = it.trigger, forDate = it.dueAt.atZone(zone).toLocalDate(), slot = it.slot))
+                doseLogs.insertIgnore(DoseLogEntity(medicationId = it.medicationId, dueAt = it.dueAt, status = DoseStatus.MISSED, trigger = it.trigger, forDate = it.dueAt.atZone(zone).toLocalDate(), slot = it.slot, dropSite = it.side?.site, side = it.side?.side))
             }
             if (plan.missedLogIds.isNotEmpty()) doseLogs.markMissed(plan.missedLogIds)
             prefs.lastScanAt = now
@@ -150,7 +155,7 @@ class ReminderEngine(
                 notifier.ring(
                     ring.sortedBy { it.dueAt }.mapNotNull { log ->
                         medsById[log.medicationId]?.let { med ->
-                            RingItem(log.id, med.displayName(), listOfNotNull(med.doseLineOn(log.forDate), med.notes?.takeIf { it.isNotBlank() }).joinToString(" · "), med.coverPhoto)
+                            RingItem(log.id, med.displayName(), listOfNotNull(med.doseLineOn(log.forDate), log.doseSide?.label, med.notes?.takeIf { it.isNotBlank() }).joinToString(" · "), med.coverPhoto)
                         }
                     },
                 )

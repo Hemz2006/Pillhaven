@@ -1,5 +1,10 @@
 package com.medtrack.health
 
+import com.medtrack.schedule.DoseSide
+import com.medtrack.schedule.DropSite
+import com.medtrack.schedule.Side
+import com.medtrack.data.MedForm
+import com.medtrack.data.doseSide
 import android.app.AlarmManager
 import android.app.NotificationManager
 import android.content.Context
@@ -156,5 +161,18 @@ class MealCheckerTest {
         meals = meals!! + Meal(at("2026-10-13T21:00"), MealType.DINNER)
         now = at("2026-10-13T22:05"); checker.check()
         assertEquals(2, logs().size)
+    }
+
+    @Test fun passesRuleSide() = runBlocking {
+        val nose = db.medicationDao().insert(
+            MedicationEntity(
+                genericName = "N", form = MedForm.DROPS, dropSite = DropSite.NOSE,
+                steps = listOf(Schedule(ScheduleRule.AfterMeal(MealType.BREAKFAST, 30, LocalTime.of(10, 0), Side.RIGHT), LocalDate.parse("2026-10-01"))),
+                createdAt = now,
+            ),
+        )
+        meals = listOf(Meal(at("2026-10-13T08:10"), MealType.BREAKFAST))
+        checker.check()
+        assertEquals(DoseSide(DropSite.NOSE, Side.RIGHT), logs().single { it.medicationId == nose }.doseSide)
     }
 }

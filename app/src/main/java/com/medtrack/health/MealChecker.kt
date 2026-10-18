@@ -1,5 +1,6 @@
 package com.medtrack.health
 
+import com.medtrack.data.sideOf
 import com.medtrack.data.DoseLogDao
 import com.medtrack.data.MedicationDao
 import com.medtrack.reminders.ReminderEngine
@@ -37,7 +38,7 @@ class MealChecker(
             val slot = rule.slot!!
             val handled = if ((med.id to slot) in handledToday) setOf(today) else emptySet()
             val due = mealTriggeredDose(step, rule, meals, today, zone, handled) ?: continue
-            engine.addMealDose(med.id, slot, maxOf(due, now), today)
+            engine.addMealDose(med.id, slot, maxOf(due, now), today, med.sideOf(rule))
         }
     }
 }

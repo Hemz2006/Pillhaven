@@ -1,5 +1,10 @@
 package com.medtrack.reminders
 
+import com.medtrack.schedule.DoseSide
+import com.medtrack.schedule.DropSite
+import com.medtrack.schedule.Side
+import com.medtrack.data.MedForm
+import com.medtrack.data.doseSide
 import android.app.AlarmManager
 import android.app.NotificationManager
 import android.content.Context
@@ -151,7 +156,7 @@ class ReminderEngineTest {
         val id = addDaily("metformin", "08:00")
         syncAt("2026-10-13T07:00")
         now = at("2026-10-13T07:30")
-        engine.recordUpcoming(id, at("2026-10-13T08:00"), DoseStatus.TAKEN, null)
+        engine.recordUpcoming(id, at("2026-10-13T08:00"), DoseStatus.TAKEN, null, null)
         syncAt("2026-10-13T08:00")
         assertEquals(0, doseNotifications().size)
         assertEquals(DoseStatus.TAKEN, db.doseLogDao().since(Instant.EPOCH).single().status)
@@ -174,7 +179,7 @@ class ReminderEngineTest {
         syncAt("2026-10-13T07:00")
         syncAt("2026-10-13T08:00")
         assertEquals(1, doseNotifications().size)
-        engine.recordUpcoming(id, at("2026-10-13T08:00"), DoseStatus.TAKEN, null)
+        engine.recordUpcoming(id, at("2026-10-13T08:00"), DoseStatus.TAKEN, null, null)
         assertEquals(DoseStatus.TAKEN, db.doseLogDao().since(Instant.EPOCH).single().status)
         assertEquals(0, doseNotifications().size)
     }
@@ -182,7 +187,7 @@ class ReminderEngineTest {
     @Test fun mealDoseDueNowRingsImmediately() = runBlocking {
         val id = addDaily("metformin", "21:00")
         syncAt("2026-10-13T09:00")
-        engine.addMealDose(id, "meal:BREAKFAST", at("2026-10-13T09:00"), LocalDate.parse("2026-10-13"))
+        engine.addMealDose(id, "meal:BREAKFAST", at("2026-10-13T09:00"), LocalDate.parse("2026-10-13"), null)
         assertEquals(1, doseNotifications().size)
     }
 
@@ -228,7 +233,7 @@ class ReminderEngineTest {
         val id = addDaily("metformin", "08:00")
         syncAt("2026-10-13T07:00")
         now = at("2026-10-13T07:30")
-        val recorded = engine.recordUpcoming(id, at("2026-10-13T08:00"), DoseStatus.TAKEN, null)!!
+        val recorded = engine.recordUpcoming(id, at("2026-10-13T08:00"), DoseStatus.TAKEN, null, null)!!
         assertNull(recorded.previous)
         engine.undo(recorded.logId, recorded.previous)
         assertEquals(0, db.doseLogDao().since(Instant.EPOCH).size)
@@ -242,7 +247,7 @@ class ReminderEngineTest {
         val id = addDaily("metformin", "08:00")
         syncAt("2026-10-13T07:00")
         syncAt("2026-10-13T08:00")
-        val recorded = engine.recordUpcoming(id, at("2026-10-13T08:00"), DoseStatus.SKIPPED, null)!!
+        val recorded = engine.recordUpcoming(id, at("2026-10-13T08:00"), DoseStatus.SKIPPED, null, null)!!
         assertEquals(DoseStatus.PENDING, recorded.previous)
         engine.undo(recorded.logId, recorded.previous)
         assertEquals(DoseStatus.PENDING, db.doseLogDao().get(recorded.logId)!!.status)
@@ -252,7 +257,7 @@ class ReminderEngineTest {
         val id = addDaily("metformin", "08:00")
         syncAt("2026-10-13T07:00")
         now = at("2026-10-13T07:59")
-        val recorded = engine.recordUpcoming(id, at("2026-10-13T08:00"), DoseStatus.TAKEN, null)!!
+        val recorded = engine.recordUpcoming(id, at("2026-10-13T08:00"), DoseStatus.TAKEN, null, null)!!
         syncAt("2026-10-13T08:00")
         now = at("2026-10-13T08:01")
         engine.undo(recorded.logId, recorded.previous)
@@ -279,5 +284,53 @@ class ReminderEngineTest {
         syncAt("2026-10-14T09:00")
         val text = doseNotifications().single().notification.extras.getCharSequence(android.app.Notification.EXTRA_TEXT).toString()
         assertEquals(true, "1 puff" in text)
+    }
+
+    private fun addEyeDrops(): Long = runBlocking {
+        db.medicationDao().insert(
+            MedicationEntity(
+                genericName = "M", form = MedForm.DROPS, dropSite = DropSite.EYE,
+                steps = listOf(
+                    Schedule(
+                        listOf(ScheduleRule.DailyTimes(listOf(LocalTime.of(8, 0)), Side.LEFT), ScheduleRule.DailyTimes(listOf(LocalTime.of(21, 0)), Side.RIGHT)),
+                        LocalDate.parse("2026-10-01"),
+                    ),
+                ),
+                createdAt = now,
+            ),
+        )
+    }
+
+    @Test fun scanStoresSide() = runBlocking {
+        addEyeDrops()
+        syncAt("2026-10-13T07:00")
+        syncAt("2026-10-13T08:00")
+        assertEquals(DoseSide(DropSite.EYE, Side.LEFT), db.doseLogDao().pending().single().doseSide)
+        val text = doseNotifications().single().notification.extras.getCharSequence(android.app.Notification.EXTRA_TEXT).toString()
+        assertEquals(true, "Left eye" in text)
+    }
+
+    @Test fun recordUpcomingStoresSide() = runBlocking {
+        val id = addEyeDrops()
+        syncAt("2026-10-13T07:00")
+        engine.recordUpcoming(id, at("2026-10-13T21:00"), DoseStatus.TAKEN, null, DoseSide(DropSite.EYE, Side.RIGHT))
+        assertEquals(DoseSide(DropSite.EYE, Side.RIGHT), db.doseLogDao().find(id, at("2026-10-13T21:00"))!!.doseSide)
+    }
+
+    @Test fun logKeepsSideAfterMedicineEdited() = runBlocking {
+        val id = addEyeDrops()
+        syncAt("2026-10-13T07:00")
+        syncAt("2026-10-13T08:00")
+        db.medicationDao().update(db.medicationDao().get(id)!!.copy(form = MedForm.TABLET))
+        syncAt("2026-10-13T21:00")
+        assertEquals(DoseSide(DropSite.EYE, Side.LEFT), db.doseLogDao().find(id, at("2026-10-13T08:00"))!!.doseSide)
+        assertNull(db.doseLogDao().find(id, at("2026-10-13T21:00"))!!.doseSide)
+    }
+
+    @Test fun mealDoseStoresSide() = runBlocking {
+        val id = addDaily("metformin", "21:00")
+        syncAt("2026-10-13T09:00")
+        engine.addMealDose(id, "meal:BREAKFAST", at("2026-10-13T09:00"), LocalDate.parse("2026-10-13"), DoseSide(DropSite.EAR, Side.BOTH))
+        assertEquals(DoseSide(DropSite.EAR, Side.BOTH), db.doseLogDao().find(id, at("2026-10-13T09:00"))!!.doseSide)
     }
 }

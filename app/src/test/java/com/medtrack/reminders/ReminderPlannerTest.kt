@@ -1,5 +1,8 @@
 package com.medtrack.reminders
 
+import com.medtrack.schedule.DoseSide
+import com.medtrack.schedule.DropSite
+import com.medtrack.schedule.Side
 import com.medtrack.data.DoseTrigger
 import com.medtrack.schedule.MealType
 import com.medtrack.schedule.Schedule
@@ -104,5 +107,18 @@ class ReminderPlannerTest {
 
     @Test fun noMedicationsNoWake() {
         assertEquals(null, plan(emptyList(), "2026-10-13T07:00", "2026-10-13T08:00").nextWake)
+    }
+
+    @Test fun newDoseCarriesSide() {
+        val eyes = Schedule(
+            listOf(ScheduleRule.DailyTimes(listOf(LocalTime.of(8, 0)), Side.LEFT), ScheduleRule.DailyTimes(listOf(LocalTime.of(21, 0)), Side.RIGHT)),
+            LocalDate.parse("2026-10-01"),
+        )
+        val morning = plan(listOf(MedSchedule(1, eyes, DropSite.EYE)), "2026-10-13T07:00", "2026-10-13T08:00")
+        assertEquals(DoseSide(DropSite.EYE, Side.LEFT), morning.newDoses.single().side)
+        val night = plan(listOf(MedSchedule(1, eyes, DropSite.EYE)), "2026-10-13T20:00", "2026-10-13T21:00")
+        assertEquals(DoseSide(DropSite.EYE, Side.RIGHT), night.newDoses.single().side)
+        val noSite = plan(listOf(MedSchedule(1, eyes)), "2026-10-13T07:00", "2026-10-13T08:00")
+        assertEquals(null, noSite.newDoses.single().side)
     }
 }

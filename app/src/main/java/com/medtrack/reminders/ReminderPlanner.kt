@@ -1,6 +1,8 @@
 package com.medtrack.reminders
 
 import com.medtrack.data.DoseTrigger
+import com.medtrack.schedule.DoseSide
+import com.medtrack.schedule.DropSite
 import com.medtrack.schedule.Schedule
 import com.medtrack.schedule.ScheduleRule
 import com.medtrack.schedule.dosesBetween
@@ -15,10 +17,13 @@ val MISSED_AFTER: Duration = Duration.ofHours(2)
 val SNOOZE_FOR: Duration = Duration.ofMinutes(10)
 private val MAX_BACKFILL: Duration = Duration.ofDays(7)
 
-/** One step of a medication's schedule; a medication with several steps gives several of these. */
-data class MedSchedule(val medicationId: Long, val schedule: Schedule)
+/**
+ * One step of a medication's schedule; a medication with several steps gives several of these.
+ * [site] is set when its doses have sides (drops for an eye, ear or nose).
+ */
+data class MedSchedule(val medicationId: Long, val schedule: Schedule, val site: DropSite? = null)
 data class PendingDose(val logId: Long, val medicationId: Long, val dueAt: Instant, val snoozedUntil: Instant?)
-data class NewDose(val medicationId: Long, val dueAt: Instant, val trigger: DoseTrigger, val slot: String? = null)
+data class NewDose(val medicationId: Long, val dueAt: Instant, val trigger: DoseTrigger, val slot: String? = null, val side: DoseSide? = null)
 
 /** An after-meal rule's doses: (medication id, [com.medtrack.schedule.slot]). */
 typealias SlotKey = Pair<Long, String>
@@ -58,8 +63,9 @@ fun planScan(
         val slot = rule.slot
         val skip = slot?.let { handledDates[med.medicationId to it] }.orEmpty()
         val trigger = if (rule is ScheduleRule.AfterMeal) DoseTrigger.FALLBACK else DoseTrigger.SCHEDULE
+        val side = med.site?.let { site -> rule.side?.let { DoseSide(site, it) } }
         for (due in dosesBetween(med.schedule, rule, from, now, zone, skip)) {
-            val dose = NewDose(med.medicationId, due, trigger, slot)
+            val dose = NewDose(med.medicationId, due, trigger, slot, side)
             if (due <= missedCutoff) missedDoses += dose else {
                 newDoses += dose
                 wakes += due.plus(MISSED_AFTER)

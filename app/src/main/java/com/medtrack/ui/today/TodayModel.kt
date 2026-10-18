@@ -4,6 +4,9 @@ import java.time.LocalDate
 import com.medtrack.data.DoseLogEntity
 import com.medtrack.data.DoseStatus
 import com.medtrack.data.MedicationEntity
+import com.medtrack.data.doseSide
+import com.medtrack.data.sideOf
+import com.medtrack.schedule.DoseSide
 import com.medtrack.schedule.ScheduleRule
 import com.medtrack.schedule.dosesBetween
 import com.medtrack.schedule.mealName
@@ -25,6 +28,8 @@ data class TodayItem(
     val actedAt: Instant? = null,
     /** The after-meal rule this dose belongs to, for recording it before it rings. */
     val slot: String? = null,
+    /** Which eye, ear or nostril, for drops whose doses have sides. */
+    val side: DoseSide? = null,
 )
 
 /**
@@ -38,7 +43,7 @@ fun buildDay(meds: List<MedicationEntity>, logs: List<DoseLogEntity>, today: Loc
     val todayLogs = logs.filter { it.dueAt >= dayStart && it.dueAt < dayEnd }
 
     val recorded = todayLogs.mapNotNull { log ->
-        byId[log.medicationId]?.let { TodayItem("log-${log.id}", log.id, it, log.dueAt, log.status, log.snoozedUntil, null, log.actedAt) }
+        byId[log.medicationId]?.let { TodayItem("log-${log.id}", log.id, it, log.dueAt, log.status, log.snoozedUntil, null, log.actedAt, side = log.doseSide) }
     }
     val loggedKeys = todayLogs.map { it.medicationId to it.dueAt }.toSet()
     val handledToday = logs.filter { it.forDate == today && it.slot != null }.map { it.medicationId to it.slot }.toSet()
@@ -50,7 +55,7 @@ fun buildDay(meds: List<MedicationEntity>, logs: List<DoseLogEntity>, today: Loc
             val mealHint = (rule as? ScheduleRule.AfterMeal)?.let { "After ${mealName(it.meal)}" }
             dosesBetween(step, rule, maxOf(now, dayStart.minusMillis(1)), dayEnd.minusMillis(1), zone, skip)
                 .filter { (med.id to it) !in loggedKeys }
-                .map { due -> TodayItem("up-${med.id}-${due.toEpochMilli()}", null, med, due, null, null, mealHint, slot = slot) }
+                .map { due -> TodayItem("up-${med.id}-${due.toEpochMilli()}", null, med, due, null, null, mealHint, slot = slot, side = med.sideOf(rule)) }
         }.distinctBy { it.key } // two rules landing on the same minute are one dose
     }
     return (recorded + upcoming).sortedBy { it.dueAt }
