@@ -13,6 +13,11 @@ A personal Android app for keeping track of your medicines and getting reminded 
 - **Forms and doses:**
   - Forms: tablet, capsule, syrup, inhaler, Rotacap, nebuliser (Respules), drops, injection, cream.
   - One-tap doses that suit the form, such as "2 puffs" or "1 respule in nebuliser".
+- **Which side the drops go in.** For drops, choose what they're for: eye, ear, nose, or mouth/other. Then pick **Left**, **Right** or **Both** for each schedule time, e.g. left eye in the morning and right eye at night, or left eye before surgery and right eye after. Left and right always mean the patient's side.
+  - The medicine won't save until every time has a side, or if two times would ring together for different sides.
+  - Every dose shows an amber badge such as **RIGHT EYE**, and the schedule text says the side for each time.
+  - The alarm says **PATIENT'S RIGHT EYE** in large type, with a Left/Right picture.
+  - The dose history records which side each dose went to. Editing the schedule later doesn't change past entries.
 - **Photos and notes.** Add several photos of the strip or box, while editing or straight from a medicine's page (**Add photos**). The main one appears in lists and alarms. Add notes on how you take the medicine.
 - **Flexible schedules.** A medicine can have several schedules at once:
   - times every day, with a "times a day" shortcut that spreads doses from 6 AM to 10 PM
@@ -31,6 +36,9 @@ A personal Android app for keeping track of your medicines and getting reminded 
 - **Restock reminder.** When a course is about to end (within 3 days of its last day), the app asks once whether you'd like to buy more, with the same pharmacy choices.
 - **Appearance and accessibility.** In Settings, choose System, Light (green and white) or Dark (green-black), make text, buttons and icons smaller or larger, and choose the full-screen alarm's colour and text colour. A short opening animation plays in the matching light or dark style while the app loads underneath.
 - **After-meal reminders (optional).** Connect Health Connect and log a meal in a fitness app. The reminder comes a set time after the meal. If no meal is logged, it rings at a fallback time.
+- **First-run setup.** The first time the app opens, a short **Get set** walkthrough asks for each permission on its own screen and says what it's for: notifications, exact alarms, full-screen alarm, unrestricted battery, and meal reminders (optional).
+  - **Not now** always moves on, and permissions already allowed are skipped.
+  - It ends with a checklist of what you allowed and what you skipped. You can change any of them later in Settings.
 
 ## Install on your phone
 
@@ -52,7 +60,7 @@ You need Android 9 or newer.
 
    This is the optimised build: much faster than the debug build, and its data can't be read over USB. It's signed with your local debug key, so it updates a debug install in place.
 
-5. Open Pillhaven and go to **Settings**. Allow notifications, alarms, full-screen alarms and unrestricted battery.
+5. Open Pillhaven and follow the **Get set** screens. Allow notifications, alarms, full-screen alarms and unrestricted battery; anything you skip can be allowed later in **Settings**.
    - On Realme, Oppo, Xiaomi, Vivo and Samsung phones, also allow Pillhaven to **auto-start** and **run in the background** in the phone's battery settings.
    - Without these, reminders may not ring.
 
