@@ -13,3 +13,6 @@ app/src/main/assets/brands.db
 
 # Visual Studio workspace cache
 .vs/
+
+# Superdesign design workspace
+.superdesign/
