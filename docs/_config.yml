@@ -1,0 +1,9 @@
+# GitHub Pages: publishes only the privacy policy from this folder.
+title: Pillhaven
+description: A safe place for all your medicines.
+theme: jekyll-theme-minimal
+exclude:
+  - superpowers/
+  - manual-test-checklist.md
+  - play-store-listing.md
+  - play-store-launch.md
