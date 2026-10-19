@@ -137,6 +137,15 @@ app/src/main/java/com/medtrack/
 tools/        build_brand_index.py
 ```
 
+## Support
+
+Questions, problems or ideas? Get in touch:
+
+- Email: [hemzz.devv@gmail.com](mailto:hemzz.devv@gmail.com)
+- Instagram: [@hemzz.devv](https://www.instagram.com/hemzz.devv/)
+
+In the app, both are under **Settings → Support**: tapping Email opens your mail app with the subject "Pillhaven support", and tapping Instagram opens the profile.
+
 ## Credits
 
 - Font: [Newsreader](https://github.com/productiontype/Newsreader) by Production Type, under the SIL Open Font License (`app/src/main/assets/licenses/Newsreader-OFL.txt`).
