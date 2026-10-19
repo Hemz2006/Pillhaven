@@ -33,6 +33,15 @@ open class DoseNotifier(private val context: Context) {
             lockscreenVisibility = Notification.VISIBILITY_PRIVATE
         }
         manager.createNotificationChannel(channel)
+        // While the full-screen alarm is open it plays the sound itself (see AlarmSound), so its doses move here.
+        manager.createNotificationChannel(
+            NotificationChannel(QUIET_CHANNEL_ID, "Alarm on screen", NotificationManager.IMPORTANCE_HIGH).apply {
+                description = "Doses showing on the full-screen alarm, which rings by itself"
+                setSound(null, null)
+                enableVibration(false)
+                lockscreenVisibility = Notification.VISIBILITY_PRIVATE
+            },
+        )
         // The first channel showed names on the lock screen; a channel's lock-screen setting can't be changed, so replace it.
         manager.deleteNotificationChannel(OLD_CHANNEL_ID)
     }
@@ -84,6 +93,22 @@ open class DoseNotifier(private val context: Context) {
         .setCategory(NotificationCompat.CATEGORY_ALARM)
         .build()
 
+    /**
+     * Re-posts the ringing dose notifications on the quiet channel. Android stops a notification's looping sound
+     * whenever it likes (some phones do as the full-screen alarm opens), so the alarm screen rings by itself instead,
+     * and this stops the system's copy of the sound where it is still playing.
+     */
+    fun hush() {
+        manager.activeNotifications.filter { it.tag == TAG && it.notification.channelId == CHANNEL_ID }.forEach { sbn ->
+            val quiet = Notification.Builder.recoverBuilder(context, sbn.notification)
+                .setChannelId(QUIET_CHANNEL_ID)
+                .setOnlyAlertOnce(true)
+                .build()
+            quiet.flags = quiet.flags and Notification.FLAG_INSISTENT.inv()
+            manager.notify(TAG, sbn.id, quiet)
+        }
+    }
+
     fun cancel(logId: Long) = manager.cancel(TAG, logId.toInt())
 
     /** Removes dose notifications whose log is no longer pending (taken elsewhere, missed, or deleted). */
@@ -107,6 +132,7 @@ open class DoseNotifier(private val context: Context) {
 
     companion object {
         const val CHANNEL_ID = "dose_alarms_v2"
+        const val QUIET_CHANNEL_ID = "dose_alarms_on_screen"
         private const val OLD_CHANNEL_ID = "dose_alarms_v1"
         const val TAG = "dose"
         private const val SUMMARY_TAG = "dose_summary"

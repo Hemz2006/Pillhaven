@@ -13,6 +13,7 @@ import com.medtrack.data.doseLineOn
 import com.medtrack.data.title
 import com.medtrack.data.coverPhoto
 import android.graphics.Color.TRANSPARENT
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
@@ -64,6 +65,8 @@ import java.time.ZoneId
 
 /** Full-screen alarm shown over the lock screen; lists every dose ringing right now. */
 class AlarmActivity : ComponentActivity() {
+    private lateinit var sound: AlarmSound
+
     override fun onCreate(savedInstanceState: Bundle?) {
         // System bar icons match the alarm's text: dark on amber, light on the darker colours.
         val darkText = Color(container.uiSettings.value.alarmContent).luminance() < 0.5f
@@ -73,7 +76,26 @@ class AlarmActivity : ComponentActivity() {
         setShowWhenLocked(true)
         setTurnScreenOn(true)
         val c = container
+        // Rings until every dose here is taken, skipped or snoozed: then the screen closes and the sound stops.
+        sound = AlarmSound(this)
+        ringHere()
         setContent { MedTrackTheme { AlarmScreen(c, onEmpty = ::finish) } }
+    }
+
+    /** Another dose rang while the screen was open: its notification brought the system's sound back. */
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        ringHere()
+    }
+
+    override fun onDestroy() {
+        sound.stop()
+        super.onDestroy()
+    }
+
+    private fun ringHere() {
+        sound.start()
+        DoseNotifier(this).hush()
     }
 }
 
