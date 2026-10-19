@@ -44,4 +44,10 @@ class SetupStepsTest {
         assertEquals("Open battery settings", SetupStep.BATTERY.allowLabel)
         assertTrue(SetupStep.BATTERY.reassurance.contains("Pillhaven"))
     }
+
+    /** Some phones open the list filtered to optimised apps, others open the app's own page instead of a list. */
+    @Test fun batteryStepCoversEveryScreenItCanOpen() {
+        assertTrue(SetupStep.BATTERY.reassurance.contains("All apps"))
+        assertTrue(SetupStep.BATTERY.reassurance.contains("Battery > Unrestricted"))
+    }
 }

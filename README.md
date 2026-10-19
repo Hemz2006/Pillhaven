@@ -114,7 +114,7 @@ JAVA_HOME="/c/Program Files/Android/openjdk/jdk-21.0.8" ./gradlew :app:testDebug
 
 ## Privacy
 
-Everything stays on the phone: medicines, doses, photos and history. The app goes online only to look up ingredients (RxNorm, PubChem, MedlinePlus, over https) and when you choose a pharmacy, which opens its website. Reading a pack happens on the phone; ML Kit's usage statistics are switched off, so nothing about your photos is sent anywhere. Note that Android's backup is on, so your data is included in your encrypted Google backup. The full [privacy policy](https://hemz2006.github.io/Pillhaven/privacy-policy.html) is published from `docs/privacy-policy.md`.
+Everything stays on the phone: medicines, doses, photos and history. The app goes online only to look up ingredients (RxNorm, PubChem, MedlinePlus, over https) and when you choose a pharmacy, which opens its website. Reading a pack happens on the phone; ML Kit's usage statistics are switched off, so nothing about your photos is sent anywhere. Note that Android's backup is on, so your medicines and history are included in your encrypted Google backup (photos are left out, to stay under Android's 25 MB limit). The full [privacy policy](https://hemz2006.github.io/Pillhaven/privacy-policy.html) is published from `docs/privacy-policy.md`.
 
 The app ID is `com.hemzzdevv.pillhaven`; the Kotlin code keeps its original `com.medtrack` package. Publishing steps are in [the Play Store launch guide](docs/play-store-launch.md), and the listing text and Console answers in [docs/play-store-listing.md](docs/play-store-listing.md).
 

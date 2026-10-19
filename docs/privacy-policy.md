@@ -26,11 +26,13 @@ None of it is sent to the developer or to anyone else.
 
 ## Android backup
 
-If backup is turned on in your phone's settings, Android may copy Pillhaven's data (medicines, dose history, photos and notes) to your own Google account, encrypted, so you can get it back on a new phone. This backup is managed by Google and you; the developer can't see it. You can turn it off in your phone's backup settings. Android limits how much an app can back up, so a backup may not include every photo if you have many.
+If backup is turned on in your phone's settings, Android may copy Pillhaven's medicines, schedules, dose history and notes to your own Google account, encrypted, so you can get them back on a new phone. This backup is managed by Google and you; the developer can't see it. You can turn it off in your phone's backup settings.
+
+Photos are left out of this online backup, so it always stays within Android's size limit; after restoring on a new phone you can add them again. A direct phone-to-phone transfer (cable or Wi-Fi, when setting up a new phone) does include photos.
 
 ## Looking up ingredients
 
-To show what's in a medicine (its chemical formula and what it's used for), Pillhaven looks up the ingredient's name, for example "Paracetamol", online. Only the ingredient name is sent, over an encrypted connection (https), to these free public services:
+To show what's in a medicine (its chemical formula and what it's used for), and to suggest ingredient names as you type them, Pillhaven looks up the ingredient name you type, for example "Paracetamol", online. Only that text is sent, over an encrypted connection (https), to these free public services:
 
 - [RxNorm](https://lhncbc.nlm.nih.gov/RxNav/) (US National Library of Medicine)
 - [PubChem](https://pubchem.ncbi.nlm.nih.gov/) (US National Institutes of Health)
@@ -46,7 +48,7 @@ When you scan a pack, the text is read on your phone by Google's ML Kit text rec
 
 ## Health Connect (optional meal reminders)
 
-If you connect Health Connect, Pillhaven reads only the meal (nutrition) records you log in other apps, including in the background, so it can remind you to take medicines marked "after a meal" at the right time. Pillhaven never writes to Health Connect, and the meal data stays on your phone: it isn't sent anywhere, shared, sold or used for anything else. Pillhaven's use of information received from Health Connect follows the [Health Connect Permissions policy](https://support.google.com/googleplay/android-developer/answer/12991134), including its Limited Use requirements. You can disconnect at any time in Health Connect's settings.
+If you connect Health Connect, Pillhaven reads only the meal (nutrition) records you log in other apps, including in the background, so it can remind you to take medicines marked "after a meal" at the right time. Pillhaven never writes to Health Connect, and the meal data stays on your phone (and in your own Android backup, if it's on, as part of when a dose was due): it isn't sent to the developer or anyone else, shared, sold or used for anything else. Pillhaven's use of information received from Health Connect follows the [Health Connect Permissions policy](https://support.google.com/googleplay/android-developer/answer/12991134), including its Limited Use requirements. You can disconnect at any time in Health Connect's settings.
 
 ## Ordering from pharmacies
 
@@ -54,7 +56,7 @@ The Order button opens Tata 1mg, PharmEasy or Netmeds in your browser, searching
 
 ## Permissions
 
-- **Notifications, alarms and full-screen alarms:** to remind you when a dose is due, even when the phone is locked. On the lock screen, notifications only say that a medicine is due; names appear after you unlock.
+- **Notifications, alarms and full-screen alarms:** to remind you when a dose is due, even when the phone is locked. On the lock screen, notifications only say that a medicine is due; names appear after you unlock. If you allow the full-screen alarm, it shows the medicine's name, photo and dose over the lock screen when it rings, so whoever is near the phone can see them.
 - **Camera (through your camera app):** to photograph packs, only when you choose to.
 - **Internet:** for the ingredient lookups above.
 - **Health Connect:** only if you connect it, as described above.

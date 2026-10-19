@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Android 12+: back up medicines, dose history and photos to the user's own Google account, but not the "medtrack"
-    preferences (setupDone and friends): permissions aren't restored on a new phone, so it must run Get set again.
+    Android 12+: back up medicines, dose history and notes to the user's own Google account, leaving out:
+    - photos, from the cloud backup only: Android stops an app's whole cloud backup once it passes 25 MB, and photos
+      would push it there, taking the medicines with them (a phone-to-phone transfer has no limit, so keeps them);
+    - the "medtrack" preferences (setupDone and friends): permissions aren't restored on a new phone, so it must run
+      Get set again.
     The cache and noBackupFilesDir (the brand list) are never backed up.
 -->
 <data-extraction-rules>
     <cloud-backup>
         <exclude domain="sharedpref" path="medtrack.xml" />
+        <exclude domain="file" path="photos/" />
     </cloud-backup>
     <device-transfer>
         <exclude domain="sharedpref" path="medtrack.xml" />

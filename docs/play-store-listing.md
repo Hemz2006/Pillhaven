@@ -25,7 +25,7 @@ FIND ANY INDIAN BRAND
 
 REMINDERS THAT RING
 • A full-screen alarm with Taken, Snooze and Skip, even when the phone is locked.
-• On the lock screen, notifications only say a medicine is due. Names show after you unlock.
+• Lock-screen notifications only say a medicine is due; names show after you unlock. (The full-screen alarm, if you allow it, shows the medicine and its photo so the right dose is easy to find.)
 • After-meal reminders (optional): log your meal in a fitness app through Health Connect, and the reminder comes a set time after it.
 
 SCHEDULES FOR REAL PRESCRIPTIONS
@@ -43,7 +43,7 @@ MADE FOR FAMILIES
 • Order a medicine on Tata 1mg, PharmEasy or Netmeds in one tap, and get a reminder before a course runs out.
 
 PRIVATE BY DESIGN
-Everything you enter stays on your phone. Pillhaven only goes online to look up an ingredient's name. There's no account, no analytics and no ads.
+Everything you enter stays on your phone (and in your own Android backup, if it's on). Pillhaven only goes online to look up ingredient names. There's no account, no analytics and no ads.
 
 Brand list: A-Z Medicine Dataset of India by Shudhanshu Singh (Kaggle).
 Pillhaven doesn't give medical advice; follow your doctor's instructions.
@@ -89,11 +89,11 @@ Source: [Data safety help](https://support.google.com/googleplay/android-develop
   **not** need to be disclosed." This covers medicines, doses, photos, notes and Health Connect meals.
 - Backups: if the user's data goes "to their own external drive or cloud storage account (such as Google Drive…)" and
   "your app never collects or accesses the data", it needn't be declared. This covers Android backup.
-- The ingredient lookup sends an ingredient name (e.g. "Paracetamol") to RxNorm, PubChem and MedlinePlus. Treated
+- The ingredient lookup sends the ingredient name the user types (e.g. "Paracetamol", including partial words while typing, for suggestions) to RxNorm, PubChem and MedlinePlus. Treated
   conservatively, this is **Health info** sent off the device, so declare it as below. Google: "User data transmitted
   off device that is processed ephemerally needs to be included in your form response, but … will **not** be disclosed
   in your app's Data safety section." It isn't "sharing": the transfer follows a "user-initiated action, where the user
-  reasonably expects the data to be shared" (they added the medicine to see its ingredients), and the privacy policy
+  reasonably expects the data to be shared" (they type an ingredient to look it up), and the privacy policy
   discloses it.
 
 Answers:
@@ -105,7 +105,7 @@ Answers:
 5. Data types: tick only **Health and fitness → Health info**.
    - Collected: **Yes**. Shared: **No**.
    - Processed ephemerally: **Yes**.
-   - Required or optional: **Optional** (lookups happen only when the user adds a medicine; the app works offline).
+   - Required or optional: **Optional** (lookups happen only while the user types or looks up ingredients; the app works offline).
    - Purpose: **App functionality**.
 
 *Check:* when you review the preview, the listing's safety section should say "No data shared with third parties"

@@ -15,6 +15,7 @@ import com.medtrack.data.MedicationRepository
 import com.medtrack.data.PhotoStore
 import com.medtrack.health.HealthConnectGateway
 import com.medtrack.health.MealCheckScheduler
+import com.medtrack.reminders.ReminderCheckScheduler
 import com.medtrack.health.MealChecker
 import com.medtrack.lookup.BrandIndex
 import com.medtrack.lookup.MedicationLookup
@@ -55,10 +56,13 @@ class AppContainer(context: Context) {
     val health = HealthConnectGateway(context)
     val mealChecker = MealChecker(health::mealsBetween, db.medicationDao(), db.doseLogDao(), engine)
     private val mealScheduler = MealCheckScheduler(context)
+    private val reminderChecks = ReminderCheckScheduler(context)
     val medications = MedicationRepository(db.medicationDao(), photos) { refreshReminders() }
 
     suspend fun refreshReminders() {
         engine.sync()
-        mealScheduler.update(db.medicationDao().active().any { it.steps.hasMealRule })
+        val active = db.medicationDao().active()
+        mealScheduler.update(active.any { it.steps.hasMealRule })
+        reminderChecks.update(active.isNotEmpty())
     }
 }
