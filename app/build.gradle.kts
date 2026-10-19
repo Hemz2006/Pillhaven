@@ -6,19 +6,35 @@ plugins {
     id("com.google.devtools.ksp")
 }
 
+import java.util.Properties
+
+// The Play upload key: path and passwords live in the git-ignored keystore.properties (see docs/play-store-launch.md).
+val keystoreFile: File = rootProject.file("keystore.properties")
+val keystore = Properties().apply { if (keystoreFile.exists()) keystoreFile.inputStream().use(::load) }
+
 android {
     namespace = "com.medtrack"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.medtrack"
+        applicationId = "com.hemzzdevv.pillhaven"
         minSdk = 28
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
         // 64-bit ARM only (every current Android phone): the text-recognition library's native code is ~11 MB per
         // processor type, so shipping all four would quadruple the app.
         ndk { abiFilters += "arm64-v8a" }
+    }
+    signingConfigs {
+        if (keystoreFile.exists()) {
+            create("upload") {
+                storeFile = file(keystore.getProperty("storeFile"))
+                storePassword = keystore.getProperty("storePassword")
+                keyAlias = keystore.getProperty("keyAlias")
+                keyPassword = keystore.getProperty("keyPassword")
+            }
+        }
     }
     buildTypes {
         release {
@@ -26,8 +42,8 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            // A personal app installed over USB: signed with the local debug key, so it updates the debug install in place.
-            signingConfig = signingConfigs.getByName("debug")
+            // Signed with the Play upload key; a release build without it fails (below) rather than using the debug key.
+            signingConfig = signingConfigs.findByName("upload")
         }
     }
     compileOptions {
@@ -40,6 +56,20 @@ android {
 }
 
 ksp { arg("room.schemaLocation", "$projectDir/schemas") }
+
+// A release must be signed with the upload key and carry the brand list (git-ignored, built by tools/build_brand_index.py);
+// without it brand search would silently find nothing for every Play user. Debug builds need neither.
+val brandIndex: File = file("src/main/assets/brands.db")
+tasks.matching { it.name == "preReleaseBuild" }.configureEach {
+    doFirst {
+        if (!keystoreFile.exists()) {
+            throw GradleException("keystore.properties is missing: release builds need the upload key (see docs/play-store-launch.md)")
+        }
+        if (!brandIndex.exists()) {
+            throw GradleException("app/src/main/assets/brands.db is missing: run tools/build_brand_index.py first")
+        }
+    }
+}
 
 dependencies {
     implementation(platform("androidx.compose:compose-bom:2024.12.01"))

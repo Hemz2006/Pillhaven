@@ -16,3 +16,7 @@ app/src/main/assets/brands.db
 
 # Superdesign design workspace
 .superdesign/
+
+# Release signing (never commit)
+keystore.properties
+*.jks
