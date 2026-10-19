@@ -39,4 +39,9 @@ class SetupStepsTest {
         }
         assertEquals("Allow notifications", SetupStep.NOTIFICATIONS.allowLabel)
     }
+
+    @Test fun batteryStepSendsUserToTheList() {
+        assertEquals("Open battery settings", SetupStep.BATTERY.allowLabel)
+        assertTrue(SetupStep.BATTERY.reassurance.contains("Pillhaven"))
+    }
 }

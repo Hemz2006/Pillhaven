@@ -26,8 +26,8 @@ enum class SetupStep(val title: String, val body: String, val reassurance: Strin
     BATTERY(
         "Battery",
         "So Android doesn't put Pillhaven to sleep and silence a reminder.",
-        "Pillhaven wakes only at dose times, so it uses very little battery.",
-        "Allow unrestricted battery",
+        "In the list, find Pillhaven and choose Don't optimise (or Unrestricted). It wakes only at dose times, so it uses very little battery.",
+        "Open battery settings",
     ),
     MEALS(
         "Meal reminders (optional)",

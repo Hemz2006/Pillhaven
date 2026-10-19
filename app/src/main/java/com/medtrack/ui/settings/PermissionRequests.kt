@@ -45,7 +45,8 @@ class PermissionRequests internal constructor(
         }
     }
 
-    fun battery() = context.open(Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, context.packageUri()))
+    /** The system's battery-optimisation list: Play doesn't allow medicine reminders to ask for the exemption directly. */
+    fun battery() = context.open(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
 
     /** Connects Health Connect, or opens its store page when it is missing or too old. */
     fun health(status: HealthStatus) {
