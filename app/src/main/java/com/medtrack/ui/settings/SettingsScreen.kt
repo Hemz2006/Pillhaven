@@ -66,6 +66,7 @@ import com.medtrack.ui.theme.LabelShape
 import com.medtrack.ui.theme.medColors
 import kotlinx.coroutines.launch
 import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
@@ -135,6 +136,9 @@ fun SettingsScreen(c: AppContainer) {
             HorizontalDivider(color = MaterialTheme.medColors.foil)
             Support()
 
+            HorizontalDivider(color = MaterialTheme.medColors.foil)
+            About()
+
             Spacer(Modifier.height(islandBottom()))
         }
     }
@@ -179,18 +183,23 @@ private fun StatusTag(ok: Boolean) {
 
 private const val SUPPORT_EMAIL = "hemzz.devv@gmail.com"
 private const val SUPPORT_INSTAGRAM = "https://www.instagram.com/hemzz.devv/"
+const val PRIVACY_POLICY_URL = "https://hemz2006.github.io/Pillhaven/privacy-policy.html"
+private const val BRAND_DATASET_URL = "https://www.kaggle.com/datasets/shudhanshusingh/az-medicine-dataset-of-india"
+
+/** Starts [intent], or says what's missing when no app can handle it. */
+fun Context.openOrSay(intent: Intent, missing: String) {
+    try {
+        startActivity(intent)
+    } catch (e: ActivityNotFoundException) {
+        Toast.makeText(this, missing, Toast.LENGTH_SHORT).show()
+    }
+}
 
 /** Ways to reach the developer: email opens the mail app with a subject filled in, Instagram opens the app or browser. */
 @Composable
 private fun Support() {
     val context = LocalContext.current
-    fun open(intent: Intent, missing: String) {
-        try {
-            context.startActivity(intent)
-        } catch (e: ActivityNotFoundException) {
-            Toast.makeText(context, missing, Toast.LENGTH_SHORT).show()
-        }
-    }
+    val open = context::openOrSay
     Text("Support", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(16.dp))
     Text(
         "Questions, problems or ideas? Get in touch.",
@@ -217,6 +226,31 @@ private fun Support() {
         modifier = Modifier.clickable(onClickLabel = "Open Instagram") {
             open(Intent(Intent.ACTION_VIEW, Uri.parse(SUPPORT_INSTAGRAM)), "No app to open Instagram")
         },
+    )
+}
+
+/** The privacy policy, credit for the brand list the search is built from, and the app version. */
+@Composable
+private fun About() {
+    val context = LocalContext.current
+    fun browse(url: String) = context.openOrSay(Intent(Intent.ACTION_VIEW, Uri.parse(url)), "No browser to open the link")
+    Text("About", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(16.dp))
+    ListItem(
+        headlineContent = { Text("Privacy policy", style = MaterialTheme.typography.titleMedium) },
+        supportingContent = { Text("What Pillhaven stores and sends") },
+        modifier = Modifier.clickable(onClickLabel = "Open the privacy policy") { browse(PRIVACY_POLICY_URL) },
+    )
+    ListItem(
+        headlineContent = { Text("Medicine brand list", style = MaterialTheme.typography.titleMedium) },
+        supportingContent = { Text("A-Z Medicine Dataset of India by Shudhanshu Singh (Kaggle)") },
+        modifier = Modifier.clickable(onClickLabel = "Open the dataset page") { browse(BRAND_DATASET_URL) },
+    )
+    val version = remember { context.packageManager.getPackageInfo(context.packageName, 0).versionName }
+    Text(
+        "Version $version",
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.medColors.inkMuted,
+        modifier = Modifier.padding(16.dp),
     )
 }
 

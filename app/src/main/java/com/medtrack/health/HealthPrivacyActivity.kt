@@ -1,6 +1,11 @@
 package com.medtrack.health
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import androidx.compose.material3.TextButton
+import com.medtrack.ui.settings.PRIVACY_POLICY_URL
+import com.medtrack.ui.settings.openOrSay
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -25,9 +30,15 @@ class HealthPrivacyActivity : ComponentActivity() {
                         Text(
                             "Pillhaven only reads the meals you log (nutrition records), including in the background, " +
                                 "to remind you to take medications marked \"after meal\". It never writes to Health Connect, " +
-                                "and the data stays on this phone.",
+                                "and the data stays on this phone (and in your own Android backup, if it's on).",
                             Modifier.padding(top = 12.dp),
                         )
+                        TextButton(
+                            onClick = {
+                                openOrSay(Intent(Intent.ACTION_VIEW, Uri.parse(PRIVACY_POLICY_URL)), "No browser to open the link")
+                            },
+                            modifier = Modifier.padding(top = 8.dp),
+                        ) { Text("Read the full privacy policy") }
                     }
                 }
             }
