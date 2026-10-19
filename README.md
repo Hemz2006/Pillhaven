@@ -58,9 +58,9 @@ You need Android 9 or newer.
    ./gradlew :app:installRelease
    ```
 
-   This is the optimised build: much faster than the debug build, and its data can't be read over USB. It's signed with your local debug key, so it updates a debug install in place.
+   This is the optimised build: much faster than the debug build, and its data can't be read over USB. It's signed with the Play upload key, so it needs `keystore.properties` (see [the launch guide](docs/play-store-launch.md)); without it, use `./gradlew :app:installDebug` instead.
 
-5. Open Pillhaven and follow the **Get set** screens. Allow notifications, alarms, full-screen alarms and unrestricted battery; anything you skip can be allowed later in **Settings**.
+5. Open Pillhaven and follow the **Get set** screens. Allow notifications, exact alarms, full-screen alarms, and turn off battery optimisation for Pillhaven in the list it opens; anything you skip can be allowed later in **Settings**.
    - On Realme, Oppo, Xiaomi, Vivo and Samsung phones, also allow Pillhaven to **auto-start** and **run in the background** in the phone's battery settings.
    - Without these, reminders may not ring.
 
@@ -114,9 +114,9 @@ JAVA_HOME="/c/Program Files/Android/openjdk/jdk-21.0.8" ./gradlew :app:testDebug
 
 ## Privacy
 
-Everything stays on the phone: medicines, doses, photos and history. The app goes online only to look up ingredients (RxNorm, PubChem, MedlinePlus, over https) and when you choose a pharmacy, which opens its website. Reading a pack happens on the phone; ML Kit's usage statistics are switched off, so nothing about your photos is sent anywhere. Note that Android's backup is on, so your data is included in your encrypted Google backup.
+Everything stays on the phone: medicines, doses, photos and history. The app goes online only to look up ingredients (RxNorm, PubChem, MedlinePlus, over https) and when you choose a pharmacy, which opens its website. Reading a pack happens on the phone; ML Kit's usage statistics are switched off, so nothing about your photos is sent anywhere. Note that Android's backup is on, so your data is included in your encrypted Google backup. The full [privacy policy](https://hemz2006.github.io/Pillhaven/privacy-policy.html) is published from `docs/privacy-policy.md`.
 
-The package ID is still `com.medtrack` (the app's original name), so updates install over existing installs and keep their data.
+The app ID is `com.hemzzdevv.pillhaven`; the Kotlin code keeps its original `com.medtrack` package. Publishing steps are in [the Play Store launch guide](docs/play-store-launch.md), and the listing text and Console answers in [docs/play-store-listing.md](docs/play-store-listing.md).
 
 Other docs:
 
@@ -148,6 +148,7 @@ In the app, both are under **Settings → Support**: tapping Email opens your ma
 
 ## Credits
 
+- Brand list: [A-Z Medicine Dataset of India](https://www.kaggle.com/datasets/shudhanshusingh/az-medicine-dataset-of-india) by Shudhanshu Singh (Kaggle).
 - Font: [Newsreader](https://github.com/productiontype/Newsreader) by Production Type, under the SIL Open Font License (`app/src/main/assets/licenses/Newsreader-OFL.txt`).
 - The pharmacy logos belong to Tata 1mg, PharmEasy and Netmeds; they're shown only to label the links to their sites.
 - The navigation island, calendar, view menu and alerts are Compose versions of [EasyUI](https://github.com/Surajmaurya1/easyui) components; the alert icons are from [Lucide](https://lucide.dev) (ISC licence).

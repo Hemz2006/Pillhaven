@@ -52,3 +52,12 @@ Install: `adb install -r app/build/outputs/apk/debug/app-debug.apk` (USB debuggi
 - [ ] An after-breakfast medication with a 0 min delay: log a breakfast in a Health Connect app (e.g. Samsung Health, MyFitnessPal). The reminder arrives within about 15 minutes. The fallback time doesn't ring that day.
 - [ ] No meal logged: the fallback time rings.
 - [ ] Revoke Health Connect permission: Today shows a warning; the fallback still rings.
+
+## Release build (before each Play upload)
+- [ ] `./gradlew :app:installRelease` installs as `com.hemzzdevv.pillhaven` (a separate app from an old `com.medtrack` install), version 1.0.
+- [ ] First launch shows Get set; the Battery step's button reads "Open battery settings" and opens the system battery list.
+- [ ] Allow exact alarms; a dose 2 minutes from now rings on time with the full-screen alarm on the lock screen.
+- [ ] Deny exact alarms: Settings shows "Needs attention"; a dose still rings (possibly a few minutes late).
+- [ ] Brand search: type "Dolo 650" and pick it; the composition fills in.
+- [ ] Meal reminders: Settings → Health Connect → Connect works.
+- [ ] Settings → About: Privacy policy opens the published page; Medicine brand list opens the Kaggle page; Version shows the current versionName.
