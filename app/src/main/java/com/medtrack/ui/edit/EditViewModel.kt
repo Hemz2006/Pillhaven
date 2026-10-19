@@ -18,6 +18,7 @@ import com.medtrack.lookup.formatComposition
 import com.medtrack.lookup.parseComposition
 import com.medtrack.lookup.applyLookup
 import com.medtrack.schedule.stepsValidationError
+import com.medtrack.schedule.withIntervalCountsFilled
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
@@ -68,7 +69,7 @@ class EditViewModel(private val c: AppContainer, private val id: Long) : ViewMod
             viewModelScope.launch {
                 val existing = c.db.medicationDao().get(id)
                 savedPhotos = existing?.photos.orEmpty()
-                _state.update { s -> if (existing == null) s.copy(loaded = true) else s.copy(med = existing, loaded = true) }
+                _state.update { s -> if (existing == null) s.copy(loaded = true) else s.copy(med = existing.copy(steps = existing.steps.withIntervalCountsFilled()), loaded = true) }
             }
         }
     }

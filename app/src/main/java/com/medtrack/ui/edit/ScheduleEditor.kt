@@ -60,6 +60,7 @@ import com.medtrack.schedule.kind
 import com.medtrack.schedule.mealName
 import com.medtrack.schedule.describe
 import com.medtrack.schedule.withAddedRule
+import com.medtrack.schedule.tooManyDosesError
 import com.medtrack.schedule.withKind
 import com.medtrack.schedule.withMeal
 import com.medtrack.schedule.withRule
@@ -237,7 +238,9 @@ private fun RuleBlock(rule: ScheduleRule, startDate: LocalDate, site: DropSite?,
                 }
                 is ScheduleRule.EveryNHours -> {
                     NumberField("Every how many hours", r.intervalHours) { onChange(r.copy(intervalHours = it)) }
+                    DaysField("How many doses a day", r.dosesPerDay, allowBlank = true) { onChange(r.copy(dosesPerDay = it)) }
                     TimeRow("First dose", r.anchor.toLocalTime()) { onChange(r.copy(anchor = startDate.atTime(it))) }
+                    r.tooManyDosesError()?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error) }
                 }
                 is ScheduleRule.AfterMeal -> {
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

@@ -22,7 +22,7 @@ A personal Android app for keeping track of your medicines and getting reminded 
 - **Flexible schedules.** A medicine can have several schedules at once:
   - times every day, with a "times a day" shortcut that spreads doses from 6 AM to 10 PM
   - chosen weekdays
-  - every N hours, from 6 AM by default; each day's doses stop at midnight rather than running into the next day
+  - every N hours, from 6 AM by default, for as many doses a day as you choose (e.g. 5 doses every 3 hours from 6 AM: 6 AM to 6 PM); it won't save if the doses would run past midnight
   - after breakfast, lunch or dinner
   - a course with an end date
 - **Doses that change over time.** Split a schedule into doses, e.g. 6 times a day for two weeks, then 4 times a day. Each dose has its own length ("for how many days"), amount and timings; the next one starts the day after.

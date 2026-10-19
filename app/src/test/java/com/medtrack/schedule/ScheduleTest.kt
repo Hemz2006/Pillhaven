@@ -17,7 +17,7 @@ class ScheduleTest {
     private val samples = listOf(
         Schedule(ScheduleRule.DailyTimes(listOf(t("08:00"), t("21:00"))), start),
         Schedule(ScheduleRule.Weekdays(setOf(MONDAY, WEDNESDAY, FRIDAY), listOf(t("08:00"))), start, start.plusDays(7)),
-        Schedule(ScheduleRule.EveryNHours(6, LocalDateTime.of(start, t("06:00"))), start),
+        Schedule(ScheduleRule.EveryNHours(6, LocalDateTime.of(start, t("06:00")), dosesPerDay = 3), start),
         Schedule(ScheduleRule.AfterMeal(MealType.BREAKFAST, 30, t("10:00")), start),
     )
 
@@ -65,5 +65,31 @@ class ScheduleTest {
             "Right after any meal (by 1:00 PM)",
             Schedule(ScheduleRule.AfterMeal(MealType.ANY, 0, t("13:00")), start).describe(),
         )
+    }
+
+    @Test fun everyNHoursTakesTheChosenNumberOfDoses() {
+        val rule = ScheduleRule.EveryNHours(3, LocalDateTime.of(start, t("06:00")), dosesPerDay = 5)
+        assertEquals(listOf("06:00", "09:00", "12:00", "15:00", "18:00").map(::t), rule.dailyTimes())
+        assertNull(Schedule(rule, start).validationError())
+    }
+
+    @Test fun everyNHoursNeedsADoseCount() {
+        val rule = ScheduleRule.EveryNHours(3, LocalDateTime.of(start, t("06:00")))
+        assertEquals("Enter how many doses a day", Schedule(rule, start).validationError())
+    }
+
+    @Test fun everyNHoursRefusesDosesThatRunPastMidnight() {
+        // 6 AM, 11 AM, 4 PM and 9 PM fit; a fifth would be 2 AM the next day.
+        val rule = ScheduleRule.EveryNHours(5, LocalDateTime.of(start, t("06:00")), dosesPerDay = 5)
+        assertEquals("Only 4 doses fit between 6:00 AM and midnight at every 5 hours", Schedule(rule, start).validationError())
+        assertNull(Schedule(rule.copy(dosesPerDay = 4), start).validationError())
+    }
+
+    @Test fun everyNHoursSavedWithoutACountKeepsEveryDoseBeforeMidnight() {
+        val old = ScheduleJson.decodeSteps("""[{"rules":[{"type":"interval","intervalHours":3,"anchor":"2026-10-13T06:00"}],"startDate":"2026-10-13"}]""")
+        val rule = old.single().rules.single() as ScheduleRule.EveryNHours
+        assertNull(rule.dosesPerDay)
+        assertEquals(listOf("06:00", "09:00", "12:00", "15:00", "18:00", "21:00").map(::t), rule.dailyTimes())
+        assertEquals(6, (old.withIntervalCountsFilled().single().rules.single() as ScheduleRule.EveryNHours).dosesPerDay)
     }
 }

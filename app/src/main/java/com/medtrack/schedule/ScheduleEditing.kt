@@ -44,7 +44,7 @@ fun ScheduleRule.withKind(kind: ScheduleKind, startDate: LocalDate): ScheduleRul
         ScheduleKind.WEEKDAYS -> ScheduleRule.Weekdays(
             setOf(DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY), times,
         )
-        // Starts early, so the day's doses fit before midnight.
+        // Starts early, so the day's doses fit before midnight. The dose count is left for the user to enter.
         ScheduleKind.INTERVAL -> ScheduleRule.EveryNHours(8, startDate.atTime(INTERVAL_FIRST_DOSE))
         ScheduleKind.AFTER_MEAL -> ScheduleRule.AfterMeal(MealType.BREAKFAST, 0, defaultFallback(MealType.BREAKFAST))
     }
@@ -91,3 +91,15 @@ fun Schedule.withStartDate(date: LocalDate): Schedule = copy(
         (rule as? ScheduleRule.EveryNHours)?.let { it.copy(anchor = date.atTime(it.anchor.toLocalTime())) } ?: rule
     },
 )
+
+/**
+ * Fills in the dose count of every-N-hours rules saved before it existed, with the doses they ring now,
+ * so editing an older medicine doesn't ask for it.
+ */
+fun List<Schedule>.withIntervalCountsFilled(): List<Schedule> = map { step ->
+    step.copy(
+        rules = step.rules.map { rule ->
+            if (rule is ScheduleRule.EveryNHours && rule.dosesPerDay == null) rule.copy(dosesPerDay = rule.dailyTimes().size) else rule
+        },
+    )
+}

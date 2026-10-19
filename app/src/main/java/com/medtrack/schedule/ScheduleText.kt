@@ -44,10 +44,21 @@ private fun ScheduleRule.timing(): String =
     }
 
 /**
- * An every-N-hours rule's times on each day: from the first dose, every N hours until midnight. Each day stands
- * alone, so a dose never spills past midnight into the next day (or into the next dose's dates).
+ * An every-N-hours rule's times on each day: from the first dose, every N hours, [ScheduleRule.EveryNHours.dosesPerDay]
+ * of them. Each day stands alone, so a dose never spills past midnight into the next day (or into the next dose's dates).
  */
-fun ScheduleRule.EveryNHours.dailyTimes(): List<java.time.LocalTime> {
+fun ScheduleRule.EveryNHours.dailyTimes(): List<java.time.LocalTime> = timesBeforeMidnight().let { fit -> dosesPerDay?.let(fit::take) ?: fit }
+
+/** "Only 4 doses fit between 6:00 AM and midnight at every 5 hours", or null when [dosesPerDay] fits. */
+fun ScheduleRule.EveryNHours.tooManyDosesError(): String? {
+    val fit = timesBeforeMidnight().size
+    if (dosesPerDay == null || dosesPerDay <= fit) return null
+    val doses = if (fit == 1) "Only 1 dose fits" else "Only $fit doses fit"
+    return "$doses between ${anchor.toLocalTime().format(HM)} and midnight at every $intervalHours hours"
+}
+
+/** Every dose from the first one that lands before midnight. */
+private fun ScheduleRule.EveryNHours.timesBeforeMidnight(): List<java.time.LocalTime> {
     if (intervalHours <= 0) return emptyList()
     val first = anchor.toLocalTime()
     val minutesLeft = 24 * 60 - (first.hour * 60 + first.minute)

@@ -31,9 +31,17 @@ sealed interface ScheduleRule {
     @Serializable @SerialName("weekdays")
     data class Weekdays(val days: Set<DayOfWeek>, val times: List<LocalTime>, override val side: Side? = null) : ScheduleRule
 
-    /** Doses every [intervalHours] of elapsed time from [anchor], continuing across days. */
+    /**
+     * [dosesPerDay] doses every [intervalHours] from [anchor]'s clock time, each day. Null only in schedules saved
+     * before the count existed: those keep every dose that fits before midnight.
+     */
     @Serializable @SerialName("interval")
-    data class EveryNHours(val intervalHours: Int, val anchor: LocalDateTime, override val side: Side? = null) : ScheduleRule
+    data class EveryNHours(
+        val intervalHours: Int,
+        val anchor: LocalDateTime,
+        override val side: Side? = null,
+        val dosesPerDay: Int? = null,
+    ) : ScheduleRule
 
     /** Fires [delayMinutes] after a matching meal; fires at [fallbackTime] if no meal was logged. */
     @Serializable @SerialName("meal")
@@ -95,7 +103,11 @@ private fun ScheduleRule.validationError(): String? {
             r.times.isEmpty() -> "Add at least one time"
             else -> null
         }
-        is ScheduleRule.EveryNHours -> if (r.intervalHours !in 1..24) "Interval must be 1–24 hours" else null
+        is ScheduleRule.EveryNHours -> when {
+            r.intervalHours !in 1..24 -> "Interval must be 1–24 hours"
+            r.dosesPerDay == null || r.dosesPerDay < 1 -> "Enter how many doses a day"
+            else -> r.tooManyDosesError()
+        }
         is ScheduleRule.AfterMeal -> if (r.delayMinutes !in 0..240) "Delay must be 0–240 minutes" else null
     }
 }
