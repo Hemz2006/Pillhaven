@@ -96,7 +96,7 @@ fun SettingsScreen(c: AppContainer) {
             Row("Full-screen alarms", s.fullScreen, ask::fullScreen)
             Row("Unrestricted battery", s.batteryUnrestricted, ask::battery)
             Text(
-                "On Realme, Xiaomi, Oppo, Vivo and Samsung phones, also allow Pillhaven to auto-start and run in the background in the phone's battery settings. After the phone restarts, reminders resume once you unlock it.",
+                "For Unrestricted battery, tap the words Allow background usage (not the switch), then choose Unrestricted. On Realme, Xiaomi, Oppo, Vivo and Samsung phones, also allow Pillhaven to auto-start and run in the background in the phone's battery settings. After the phone restarts, reminders resume once you unlock it.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.medColors.inkMuted,
                 modifier = Modifier.padding(16.dp),
