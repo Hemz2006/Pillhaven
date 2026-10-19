@@ -65,6 +65,14 @@ import com.medtrack.ui.common.ScreenScaffold
 import com.medtrack.ui.theme.LabelShape
 import com.medtrack.ui.theme.medColors
 import kotlinx.coroutines.launch
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.net.Uri
+import android.widget.Toast
+import androidx.compose.foundation.clickable
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.ui.res.painterResource
+import com.medtrack.R
 
 @Composable
 fun SettingsScreen(c: AppContainer) {
@@ -124,6 +132,9 @@ fun SettingsScreen(c: AppContainer) {
                 }
             }
 
+            HorizontalDivider(color = MaterialTheme.medColors.foil)
+            Support()
+
             Spacer(Modifier.height(islandBottom()))
         }
     }
@@ -164,6 +175,49 @@ private fun StatusTag(ok: Boolean) {
             modifier = Modifier.background(colors.amber, LabelShape).padding(horizontal = 6.dp, vertical = 2.dp),
         )
     }
+}
+
+private const val SUPPORT_EMAIL = "hemzz.devv@gmail.com"
+private const val SUPPORT_INSTAGRAM = "https://www.instagram.com/hemzz.devv/"
+
+/** Ways to reach the developer: email opens the mail app with a subject filled in, Instagram opens the app or browser. */
+@Composable
+private fun Support() {
+    val context = LocalContext.current
+    fun open(intent: Intent, missing: String) {
+        try {
+            context.startActivity(intent)
+        } catch (e: ActivityNotFoundException) {
+            Toast.makeText(context, missing, Toast.LENGTH_SHORT).show()
+        }
+    }
+    Text("Support", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(16.dp))
+    Text(
+        "Questions, problems or ideas? Get in touch.",
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.medColors.inkMuted,
+        modifier = Modifier.padding(horizontal = 16.dp),
+    )
+    ListItem(
+        headlineContent = { Text("Email", style = MaterialTheme.typography.titleMedium) },
+        supportingContent = { Text(SUPPORT_EMAIL) },
+        leadingContent = { Icon(Icons.Default.Email, contentDescription = null) },
+        modifier = Modifier.clickable(onClickLabel = "Write an email") {
+            open(
+                Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:")).putExtra(Intent.EXTRA_EMAIL, arrayOf(SUPPORT_EMAIL))
+                    .putExtra(Intent.EXTRA_SUBJECT, "Pillhaven support"),
+                "No email app to write to $SUPPORT_EMAIL",
+            )
+        },
+    )
+    ListItem(
+        headlineContent = { Text("Instagram", style = MaterialTheme.typography.titleMedium) },
+        supportingContent = { Text("@hemzz.devv") },
+        leadingContent = { Icon(painterResource(R.drawable.ic_instagram), contentDescription = null) },
+        modifier = Modifier.clickable(onClickLabel = "Open Instagram") {
+            open(Intent(Intent.ACTION_VIEW, Uri.parse(SUPPORT_INSTAGRAM)), "No app to open Instagram")
+        },
+    )
 }
 
 /** Light (green and white), dark, or following the phone. */
