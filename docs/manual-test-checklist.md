@@ -55,7 +55,7 @@ Install: `adb install -r app/build/outputs/apk/debug/app-debug.apk` (USB debuggi
 
 ## Release build (before each Play upload)
 - [ ] `./gradlew :app:installRelease` installs as `com.hemzzdevv.pillhaven` (a separate app from an old `com.medtrack` install), version 1.0.
-- [ ] First launch shows Get set; the Battery step's button reads "Open battery settings" and opens the system battery list.
+- [ ] First launch shows Get set; the Battery step's button reads "Open battery settings" and opens Pillhaven's own battery page (the system battery list on Android 9–11); choosing Unrestricted and coming back moves on by itself.
 - [ ] Allow exact alarms; a dose 2 minutes from now rings on time with the full-screen alarm on the lock screen.
 - [ ] Deny exact alarms: Settings shows "Needs attention"; a dose still rings (possibly a few minutes late).
 - [ ] Brand search: type "Dolo 650" and pick it; the composition fills in.

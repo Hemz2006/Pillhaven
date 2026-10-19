@@ -45,8 +45,14 @@ class PermissionRequests internal constructor(
         }
     }
 
-    /** The system's battery-optimisation list: Play doesn't allow medicine reminders to ask for the exemption directly. */
-    fun battery() = context.open(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
+    /**
+     * Pillhaven's own battery page (Android 12+), where Unrestricted is one tap away; else the system's
+     * battery-optimisation list. Play doesn't allow medicine reminders to ask for the exemption directly.
+     */
+    fun battery() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && context.tryOpen(Intent(ACTION_APP_BATTERY, context.packageUri()))) return
+        context.open(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
+    }
 
     /** Connects Health Connect, or opens its store page when it is missing or too old. */
     fun health(status: HealthStatus) {
@@ -76,12 +82,18 @@ private fun Context.packageUri(): Uri = Uri.parse("package:$packageName")
 private fun Context.openNotificationSettings() =
     open(Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, packageName))
 
+/** Settings' exported per-app battery page (Optimized / Unrestricted); not in the public SDK constants. */
+private const val ACTION_APP_BATTERY = "android.settings.VIEW_ADVANCED_POWER_USAGE_DETAIL"
+
 private fun Context.open(intent: Intent) {
-    try {
-        startActivity(intent)
-    } catch (e: android.content.ActivityNotFoundException) {
-        startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, packageUri()))
-    }
+    if (!tryOpen(intent)) startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, packageUri()))
+}
+
+private fun Context.tryOpen(intent: Intent): Boolean = try {
+    startActivity(intent)
+    true
+} catch (e: android.content.ActivityNotFoundException) {
+    false
 }
 
 private fun Context.openHealthConnectStore() =

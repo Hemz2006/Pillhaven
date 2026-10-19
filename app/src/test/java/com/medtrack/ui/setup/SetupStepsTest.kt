@@ -45,10 +45,16 @@ class SetupStepsTest {
         assertTrue(SetupStep.BATTERY.reassurance.contains("Pillhaven"))
     }
 
-    /** Some phones open the list filtered to optimised apps, others open the app's own page instead of a list. */
+    /** Pillhaven's own battery page opens on most phones; older ones open the list filtered to optimised apps. */
     @Test fun batteryStepCoversEveryScreenItCanOpen() {
+        assertTrue(SetupStep.BATTERY.reassurance.startsWith("Choose Unrestricted"))
         assertTrue(SetupStep.BATTERY.reassurance.contains("All apps"))
-        assertTrue(SetupStep.BATTERY.reassurance.contains("Battery > Unrestricted"))
+    }
+
+    /** Stock Android 14+ shows Allow background usage on with Optimized below it; ColorOS 15 shows only that switch, and it exempts. */
+    @Test fun batteryStepNamesBothBackgroundSwitches() {
+        assertTrue(SetupStep.BATTERY.reassurance.contains("alone leaves it Optimized"))
+        assertTrue(SetupStep.BATTERY.reassurance.contains("turn on Allow background usage"))
     }
 
     /** On Realme (ColorOS) "Don't optimise" alone leaves the app optimised; only Allow background activity exempts it. */

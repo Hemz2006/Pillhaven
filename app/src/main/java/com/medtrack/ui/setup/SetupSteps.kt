@@ -26,7 +26,7 @@ enum class SetupStep(val title: String, val body: String, val reassurance: Strin
     BATTERY(
         "Battery",
         "So Android doesn't put Pillhaven to sleep and silence a reminder.",
-        "Find Pillhaven in the list (switch to All apps if needed) and choose Unrestricted. On Realme, Oppo and OnePlus, turn on Allow background activity. If Pillhaven's own page opens instead, tap Battery > Unrestricted. It wakes only at dose times, so it uses very little battery.",
+        "Choose Unrestricted (on Pixel and others, Allow background usage alone leaves it Optimized). On Realme, Oppo and OnePlus there's no Unrestricted: turn on Allow background usage or Allow background activity. If a list opens instead, find Pillhaven (switch to All apps if needed) and choose Unrestricted. It wakes only at dose times, so it uses very little battery.",
         "Open battery settings",
     ),
     MEALS(

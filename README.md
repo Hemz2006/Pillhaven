@@ -60,7 +60,7 @@ You need Android 9 or newer.
 
    This is the optimised build: much faster than the debug build, and its data can't be read over USB. It's signed with the Play upload key, so it needs `keystore.properties` (see [the launch guide](docs/play-store-launch.md)); without it, use `./gradlew :app:installDebug` instead.
 
-5. Open Pillhaven and follow the **Get set** screens. Allow notifications, exact alarms, full-screen alarms, and turn off battery optimisation for Pillhaven in the list it opens; anything you skip can be allowed later in **Settings**.
+5. Open Pillhaven and follow the **Get set** screens. Allow notifications, exact alarms, full-screen alarms, and choose **Unrestricted** on the battery page it opens; anything you skip can be allowed later in **Settings**.
    - On Realme, Oppo, Xiaomi, Vivo and Samsung phones, also allow Pillhaven to **auto-start** and **run in the background** in the phone's battery settings.
    - Without these, reminders may not ring.
 
