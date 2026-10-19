@@ -50,4 +50,10 @@ class SetupStepsTest {
         assertTrue(SetupStep.BATTERY.reassurance.contains("All apps"))
         assertTrue(SetupStep.BATTERY.reassurance.contains("Battery > Unrestricted"))
     }
+
+    /** On Realme (ColorOS) "Don't optimise" alone leaves the app optimised; only Allow background activity exempts it. */
+    @Test fun batteryStepNamesTheRealmeSwitch() {
+        assertTrue(SetupStep.BATTERY.reassurance.contains("Realme"))
+        assertTrue(SetupStep.BATTERY.reassurance.contains("Allow background activity"))
+    }
 }
