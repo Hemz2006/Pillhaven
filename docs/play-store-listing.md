@@ -24,12 +24,12 @@ FIND ANY INDIAN BRAND
 • See each ingredient's chemical formula and what it's used for.
 
 REMINDERS THAT RING
-• A full-screen alarm with Taken, Snooze and Skip, even when the phone is locked.
+• A full-screen alarm with Taken, Snooze and Skip, even when the phone is locked. It keeps ringing until you choose one, so a dose isn't slept through.
 • Lock-screen notifications only say a medicine is due; names show after you unlock. (The full-screen alarm, if you allow it, shows the medicine and its photo so the right dose is easy to find.)
 • After-meal reminders (optional): log your meal in a fitness app through Health Connect, and the reminder comes a set time after it.
 
 SCHEDULES FOR REAL PRESCRIPTIONS
-• Times every day, chosen weekdays, every few hours, or after breakfast, lunch or dinner.
+• Times every day, chosen weekdays, every few hours (you choose how many doses a day), or after breakfast, lunch or dinner.
 • Courses with an end date, and doses that change over time, like 6 times a day for two weeks, then 4.
 • Eye, ear and nose drops: choose Left, Right or Both for each time. The alarm says "PATIENT'S RIGHT EYE" in large type, so nobody puts drops in the wrong eye.
 
@@ -118,6 +118,9 @@ No. **Financial features:** none. **Health apps:** see below.
 Source: [Health apps / Health Connect policy](https://support.google.com/googleplay/android-developer/answer/12991134).
 - Health features: **Medication management / reminders** (pick "Medication and treatment management" if listed), and
   **Nutrition and weight management** only if the form asks which data the app reads.
+- This makes Pillhaven a **Medical** health app, which needs an **organization** developer account (see
+  [`organization-account.md`](organization-account.md)). Don't remove the medical category to get around that: it's
+  what the app does.
 - Is the app a medical device / gives diagnosis? **No**.
 - Paste the privacy policy URL.
 
@@ -139,7 +142,7 @@ Source: [Foreground service and full-screen intent requirements](https://support
 - Core functionality: **Alarm** (the closest of the permitted options).
 - Justification: "Pillhaven's core function is medication alarms the user schedules. When a dose is due, it shows a
   full-screen alarm, like an alarm clock, so the dose isn't missed while the phone is locked. The user can mark it
-  taken, snooze or skip it from that screen. Users who decline the permission get a high-priority notification
+  taken, snooze or skip it from that screen, and it keeps ringing until they do. Users who decline the permission get a high-priority notification
   instead."
 
 ### Exact alarms
@@ -151,9 +154,9 @@ None. Pillhaven never starts a foreground service. The WorkManager library adds 
 permission to the merged manifest, but no `FOREGROUND_SERVICE_<TYPE>` permission. If the Console still shows the
 declaration, answer that the app uses no foreground service types.
 
-For reference, the release build's permissions are:
+For reference, the release build's permissions (from the merged release manifest, 19 October 2026) are:
 - INTERNET, ACCESS_NETWORK_STATE
-- POST_NOTIFICATIONS
+- POST_NOTIFICATIONS, VIBRATE (the alarm's vibration)
 - SCHEDULE_EXACT_ALARM, USE_FULL_SCREEN_INTENT
 - RECEIVE_BOOT_COMPLETED, WAKE_LOCK, FOREGROUND_SERVICE (the last two from WorkManager)
 - health.READ_NUTRITION, health.READ_HEALTH_DATA_IN_BACKGROUND

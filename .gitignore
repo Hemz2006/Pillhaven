@@ -20,3 +20,4 @@ app/src/main/assets/brands.db
 # Release signing (never commit)
 keystore.properties
 *.jks
+dist/

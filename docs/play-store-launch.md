@@ -10,6 +10,10 @@ Rules checked on 19 October 2026:
 - [Health Connect](https://support.google.com/googleplay/android-developer/answer/12991134)
 - [Data safety](https://support.google.com/googleplay/android-developer/answer/10787469)
 
+> **Account type (22 October 2026):** Google rejected the first review because Pillhaven is a Medical health app
+> (medication reminders) and new **personal** accounts can't publish those. Change the account to an **organization**
+> first: follow [`organization-account.md`](organization-account.md), then continue here from step 7.
+
 ## 0. Back up your upload key (do this today)
 
 Every update you ever publish must be signed with the same upload key. It lives outside the project, in
@@ -27,7 +31,8 @@ its `storeFile=` line if the `.jks` lives somewhere else.
 
 ## 1. Wait for account verification
 
-Google emails you when your personal developer account is verified. Until then, the steps below that need the Console
+Google emails you when your developer account is verified. Pillhaven needs an **organization** account (see
+[`organization-account.md`](organization-account.md)). Until then, the steps below that need the Console
 are locked.
 
 ## 2. Publish the privacy policy (GitHub Pages)
@@ -40,9 +45,17 @@ are locked.
 
 ## 3. Build the release bundle
 
+Build from the latest `master` (the bundle must include the newest fixes, such as the alarm that keeps ringing until
+the dose is handled):
+
 ```sh
+./gradlew :app:testDebugUnitTest
 ./gradlew :app:bundleRelease
 ```
+
+Before uploading, install the release build on a phone (`./gradlew :app:installRelease`) and run the **Release build**
+section of [`manual-test-checklist.md`](manual-test-checklist.md): Get set, the battery page, an alarm ringing on the
+lock screen until you tap Taken, brand search and Health Connect.
 
 The file to upload is `app/build/outputs/bundle/release/app-release.aab`. The build stops with a clear message if
 `keystore.properties` or the brand list (`app/src/main/assets/brands.db`, see README) is missing.
@@ -100,6 +113,9 @@ because it wasn't installed through Play.
      link.
    - **Before installing:** uninstall the old Pillhaven you installed for them over USB. The Play version is a separate
      app, so with both installed every dose would ring twice. Their medicines don't carry over; they add them again.
+   - When Pillhaven opens, go through every **Get set** screen. On the Battery screen, tap **Open battery settings**,
+     tap the words **Allow background usage** (not the switch) and choose **Unrestricted**; on some Realme, Oppo and
+     OnePlus phones turn on **Allow background activity** instead. Without this, reminders may not ring.
    - Ask them to **stay opted in for at least 14 days**, keep the app installed, and use it. Google checks
      "opted in continuously"; leaving the test resets their count.
 6. Mark day 1 on a calendar. Fix anything they report and upload a new build (step 10) to the same closed track if

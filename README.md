@@ -42,7 +42,22 @@ A personal Android app for keeping track of your medicines and getting reminded 
 
 ## Install on your phone
 
-You need Android 9 or newer.
+You need Android 9 or newer on a 64-bit phone (any phone from the last several years).
+
+### Download the app
+
+Pillhaven isn't on the Play Store yet. Until it is, install it from the [latest release](https://github.com/Hemz2006/Pillhaven/releases/latest):
+
+1. On the phone, open the release page and tap **Pillhaven-1.0.apk** to download it.
+2. Open the downloaded file. If Android asks, allow your browser (or Files app) to **install unknown apps**, then tap **Install**.
+3. If Play Protect warns that it doesn't recognise the app, tap **More details → Install anyway**. It warns about any app that isn't from the Play Store.
+4. Open Pillhaven and follow the **Get set** screens (see step 5 below).
+
+To check the download, its SHA-256 is listed on the release page.
+
+When Pillhaven arrives on the Play Store, the Play version can't update this one: Android sees them as signed differently. Uninstall this version first (your medicines don't carry over; add them again), so doses don't ring twice.
+
+### Build it yourself
 
 1. Install [Android Studio](https://developer.android.com/studio). This gives you the Android SDK and Java.
 2. Clone this repository:
